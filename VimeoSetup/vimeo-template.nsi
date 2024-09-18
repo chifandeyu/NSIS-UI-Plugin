@@ -259,15 +259,22 @@ Function .onInit
 	; Initialize AutoInstall variable to default value "0"
     StrCpy $AutoInstall "0"
 
-    ; Get the command line arguments
-    ; Note: Command line arguments are stored in $0, $1, ..., $n
-    ; Loop through command line arguments
+    ; Extract command line arguments
     StrCpy $0 $CMDLINE
+
+    ; Parse each command line argument
+    ; Loop through arguments
     ${Do}
-        ; Extract the parameter and value
-        ${StrTok} $0 "=" $1 $2
+        ; Extract parameter name and value
+        StrCmp $0 "" 0 +2
+        ; Find the position of '='
+        StrCmp $0 "=" 0 +2
+        ; Split argument
+        StrCpy $1 $0 0 $0
+        StrCpy $2 $0 0
+        ; Check if parameter is "/AutoInstall"
         StrCmp $1 "/AutoInstall" 0 +2
-        ; Set AutoInstall variable if the parameter is found
+        ; Set AutoInstall variable
         StrCpy $AutoInstall $2
         ; Stop further processing
         Goto ${End}
