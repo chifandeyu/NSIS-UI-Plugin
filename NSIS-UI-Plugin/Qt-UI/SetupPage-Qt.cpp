@@ -53,28 +53,15 @@ SetupPage_Qt::SetupPage_Qt(QWidget *parent)
     });
 
     connect(ui.pushButtonSelectInstallDir, &QPushButton::clicked, [this]() {
-        QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), "/", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+        const QString oldDir = ui.lineEditInstallDir->text();
+        QString dir = QFileDialog::getExistingDirectory(this, tr("打开文件夹"), "/", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
         dir = QDir::toNativeSeparators(dir);
+        if (dir.isEmpty() || dir == oldDir) return;
         ui.lineEditInstallDir->setText(dir);
         updateDriverInfo();
     });
 
-    connect(ui.pushButtonStartInstall, &QPushButton::clicked, this, [this]() {
-        QString strDir = ui.lineEditInstallDir->text();
-        if (strDir.length() == 0)
-            return;
-
-        QDir dir(strDir);
-        if (!dir.exists()) {
-            if (!dir.mkdir(strDir)) {
-                return;
-            }
-        }
-
-        PluginContext::Instance()->ExecuteInstallEventFunction(INSTALL_EVENT_START_EXTRACT_FILES);
-
-        ui.tabWidget->setCurrentIndex(1);
-    });
+    connect(ui.pushButtonStartInstall, &QPushButton::clicked, this, &SetupPage_Qt::StartInstall);
 
     connect(ui.pushButtonToFinishedPage, &QPushButton::clicked, [this]() {
         ui.tabWidget->setCurrentIndex(2);
@@ -120,6 +107,24 @@ void SetupPage_Qt::SetInstallDirectory(const tstring &dir) {
     updateDriverInfo();
 }
 
+void SetupPage_Qt::StartInstall()
+{
+    QString strDir = ui.lineEditInstallDir->text();
+    if (strDir.length() == 0)
+        return;
+
+    QDir dir(strDir);
+    if (!dir.exists()) {
+        if (!dir.mkdir(strDir)) {
+            return;
+        }
+    }
+
+    PluginContext::Instance()->ExecuteInstallEventFunction(INSTALL_EVENT_START_EXTRACT_FILES);
+
+    ui.tabWidget->setCurrentIndex(1);
+}
+
 tstring SetupPage_Qt::GetInstallDirectory() {
     QString strDir = ui.lineEditInstallDir->text();
     return QStringTotstring(strDir);
@@ -159,7 +164,7 @@ void SetupPage_Qt::updateDriverInfo() {
         float driverTotalMb = DriveInfo::GetTotalMB(driver);
         float driverFreeMb = DriveInfo::GetFreeMB(driver);
 
-        QString strDiskInfo = QString("Required: %1MB Free: %2MB  Total: %3MB").arg(m_requiredSpaceKb / 1024).arg(driverFreeMb).arg(driverTotalMb);
+        QString strDiskInfo = QString(tr("需要空间: %1MB 可用: %2MB  总计: %3MB")).arg(m_requiredSpaceKb / 1024).arg(driverFreeMb).arg(driverTotalMb);
         ui.labelDiskInfo->setText(strDiskInfo);
     }
 }

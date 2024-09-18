@@ -3,9 +3,10 @@
 }
 
 QWidget#widgetTitle {
-    border-top-right-radius: 8px;
-    border-top-left-radius: 8px;
-    background-color: rgb(79, 133, 233);
+    border-top-right-radius: 4px;
+    border-top-left-radius: 4px;
+    /*background-color: rgb(79, 133, 233);*/
+    background-color: #888888;
 }
 
 
@@ -31,7 +32,7 @@ QWidget#tabWidget::pane {
 
 
 QSvgWidget#widgetLogo {
-    image: url(:/DefaultTheme/qt.svg);
+    image: url(:/DefaultTheme/logo.png);
 }
 
 #labelTitle {

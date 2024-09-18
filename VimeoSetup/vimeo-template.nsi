@@ -1,14 +1,24 @@
 # ========================= User Defined Macro ==============================
+
 # Most time you just need edit user defined macro
-!define PRODUCT_NAME           "vimeo"
-!define EXE_NAME               "vimeo.exe"
-!define EXE_RELATIVE_PATH      "bin\vimeo.exe"
-!define PRODUCT_VERSION        "1.0.0.1"
-!define PRODUCT_PUBLISHER      "vimeo"
-!define PRODUCT_LEGAL          "Copyright (C) 1999-2024 vimeo, All Rights Reserved"
-!define INSTALL_ICON_PATH      "vimeo.ico"
-!define UNINSTALL_ICON_PATH    "vimeo.ico"
-!define DEFAULT_INSTALL_DIR    "$PROGRAMFILES\${PRODUCT_NAME}"
+!define PRODUCT_NAME           "yunVM"
+!define APP_NAME               "yunVM"
+!define EXE_NAME               "yunVM.exe"
+!define EXE_RELATIVE_PATH      "yunVM.exe"
+!ifdef PRODUCT_VERSION
+
+!else
+  !define PRODUCT_VERSION "1.0.0.0"
+!endif
+!define PRODUCT_PUBLISHER      "Bangyan Technology Co., Ltd"
+!define PRODUCT_LEGAL          "Copyright (C) 2023-2030 bangyan technology, All Rights Reserved"
+!define INSTALL_ICON_PATH      "Install.ico"
+!define UNINSTALL_ICON_PATH    "Uninstall.ico"
+!define DEFAULT_INSTALL_DIR    "$PROGRAMFILES\${APP_NAME}"
+
+Var /GLOBAL installDir
+; 定义一个是否自动安装的参数变量：
+Var /GLOBAL AutoInstall
 
 !ifdef DEBUG
 !define UI_PLUGIN_NAME         nsQtPluginD
@@ -29,11 +39,11 @@
 # ===================== Setup Info =============================
 VIProductVersion                    "${PRODUCT_VERSION}"
 VIAddVersionKey "ProductVersion"    "${PRODUCT_VERSION}"
-VIAddVersionKey "ProductName"       "${PRODUCT_NAME}"
+VIAddVersionKey "ProductName"       "${APP_NAME}"
 VIAddVersionKey "CompanyName"       "${PRODUCT_PUBLISHER}"
 VIAddVersionKey "FileVersion"       "${PRODUCT_VERSION}"
 VIAddVersionKey "InternalName"      "${EXE_NAME}"
-VIAddVersionKey "FileDescription"   "${PRODUCT_NAME}"
+VIAddVersionKey "FileDescription"   "${APP_NAME} for windows"
 VIAddVersionKey "LegalCopyright"    "${PRODUCT_LEGAL}"
 
 # ==================== NSIS Attribute ================================
@@ -42,10 +52,10 @@ Unicode True
 SetCompressor LZMA
 !ifdef DEBUG
 Name "${PRODUCT_NAME} [Debug]"
-OutFile "${PRODUCT_NAME}-setup-debug.exe"
+OutFile "${PRODUCT_NAME}-${PRODUCT_VERSION}-setup-x86-debug.exe"
 !else
 Name "${PRODUCT_NAME}"
-OutFile "${PRODUCT_NAME}-setup.exe"
+OutFile "${PRODUCT_NAME}-${PRODUCT_VERSION}-x86-setup.exe"
 !endif
 
 # ICON
@@ -66,21 +76,21 @@ UninstPage instfiles
 
 # ======================= Qt Page =========================
 Function QtUiPage
-	${UI_PLUGIN_NAME}::OutputDebugInfo "NSIS Plugin Dir: $PLUGINSDIR"
-	
+	${UI_PLUGIN_NAME}::OutputDebugInfo "NSIS Plugin Dir: $PLUGINSDIR, AutoInstall: $AutoInstall"
+
 	GetFunctionAddress $0 OnUIPrepared
 	${UI_PLUGIN_NAME}::BindInstallEventToNsisFunc "UI_PREPARED" $0
-	
+
 	GetFunctionAddress $0 OnStartExtractFiles
 	${UI_PLUGIN_NAME}::BindInstallEventToNsisFunc "START_EXTRACT_FILES" $0
-	
+
 	GetFunctionAddress $0 OnBeforeFinished
 	${UI_PLUGIN_NAME}::BindInstallEventToNsisFunc "BEFORE_FINISHED" $0
-	
+
 	GetFunctionAddress $0 OnUserCancelInstall
 	${UI_PLUGIN_NAME}::BindInstallEventToNsisFunc "USER_CANCEL" $0
-	
-    ${UI_PLUGIN_NAME}::ShowSetupUI "${PRODUCT_NAME} Setup" "${DEFAULT_INSTALL_DIR}" "$PLUGINSDIR"
+
+    ${UI_PLUGIN_NAME}::ShowSetupUI "${PRODUCT_NAME} Setup" "$installDir" "$PLUGINSDIR" "$AutoInstall"
 FunctionEnd
 
 Function OnUIPrepared
@@ -89,18 +99,18 @@ FunctionEnd
 
 Function OnStartExtractFiles
 	${UI_PLUGIN_NAME}::OutputDebugInfo "OnStartExtractFiles"
-	
+
 	${UI_PLUGIN_NAME}::GetInstallDirectory
 	Pop $0
 	StrCmp $0 "" InstallAbort 0
     StrCpy $INSTDIR "$0"
 	${UI_PLUGIN_NAME}::OutputDebugInfo "Install Dir: $0"
-	
+
 	SetOutPath $INSTDIR
-  
+
     GetFunctionAddress $0 ___ExtractFiles
     ${UI_PLUGIN_NAME}::BackgroundRun $0
-		
+
 
 InstallAbort:
 FunctionEnd
@@ -108,36 +118,36 @@ FunctionEnd
 
 Function OnUserCancelInstall
 	${UI_PLUGIN_NAME}::OutputDebugInfo "OnUserCancelInstall"
-	
+
 	Abort
 FunctionEnd
 
 
 Function OnBeforeFinished
 	${UI_PLUGIN_NAME}::OutputDebugInfo "OnBeforeFinished"
-	
+
 	SetShellVarContext all
 	CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
-	CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk" "$INSTDIR${EXE_RELATIVE_PATH}"
+	CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk" "$INSTDIR\${EXE_RELATIVE_PATH}"
 	CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall ${PRODUCT_NAME}.lnk" "$INSTDIR\uninst.exe"
 	SetShellVarContext current
-	
-	
+
+
 	# Create Desktop Shortcut
 	${UI_PLUGIN_NAME}::IsCreateDesktopShortcutEnabled
 	Pop $0
 	${If} $0 == 1
 		SetShellVarContext all
-		CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR${EXE_RELATIVE_PATH}"
+		CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${EXE_RELATIVE_PATH}"
 		SetShellVarContext current
 	${EndIf}
-	
-	
+
+
 	# Auto Startup On Boot
 	${UI_PLUGIN_NAME}::IsAutoStartupOnBootEnabled
 	Pop $0
 	${If} $0 == 1
-		WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "${PRODUCT_NAME}" "$INSTDIR${EXE_RELATIVE_PATH}"
+		WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "${APP_NAME}" "$INSTDIR\${EXE_RELATIVE_PATH}"
 	${EndIf}
 FunctionEnd
 
@@ -159,10 +169,11 @@ FunctionEnd
 
 Function CreateUninstall
 	WriteUninstaller "$INSTDIR\uninst.exe"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "DisplayName" "${PRODUCT_NAME}"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "UninstallString" "$INSTDIR\uninst.exe"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "DisplayIcon" "$INSTDIR\${EXE_NAME}"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "Publisher" "$INSTDIR\${PRODUCT_PUBLISHER}"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "DisplayName" "${PRODUCT_NAME}"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "UninstallString" "$INSTDIR\uninst.exe"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "InstallLocation" "$INSTDIR"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "DisplayIcon" "$INSTDIR\${EXE_NAME}"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "Publisher" "${PRODUCT_PUBLISHER}"
 FunctionEnd
 
 # Add an empty section, avoid compile error.
@@ -178,8 +189,16 @@ Section "Uninstall"
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall ${PRODUCT_NAME}.lnk"
   RMDir "$SMPROGRAMS\${PRODUCT_NAME}\"
   Delete "$DESKTOP\${PRODUCT_NAME}.lnk"
+
+  # 删除注册表项
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}"
+
+
+  MessageBox MB_ICONQUESTION|MB_YESNO "Uninstall" /SD IDYES IDYES +2 IDNO +1
+
+
   SetShellVarContext current
-  
+
   SetOutPath "$INSTDIR"
 
   ; Delete installed files
@@ -189,7 +208,7 @@ Section "Uninstall"
 
   RMDir /r "$INSTDIR"
   RMDir "$INSTDIR"
-  
+
   SetAutoClose true
 SectionEnd
 
@@ -198,29 +217,29 @@ SectionEnd
 Function .onInit
 	# makesure plugin directory exist
 	InitPluginsDir
-	
+
 	# place Qt dlls to plugin directory
-    File /oname=$PLUGINSDIR\Qt5Core${QT_DLL_SUFFIX}.dll "$%QTDIR%\bin\Qt5Core${QT_DLL_SUFFIX}.dll"
-	File /oname=$PLUGINSDIR\Qt5Gui${QT_DLL_SUFFIX}.dll "$%QTDIR%\bin\Qt5Gui${QT_DLL_SUFFIX}.dll"
-	File /oname=$PLUGINSDIR\Qt5Widgets${QT_DLL_SUFFIX}.dll "$%QTDIR%\bin\Qt5Widgets${QT_DLL_SUFFIX}.dll"
-	File /oname=$PLUGINSDIR\Qt5Svg${QT_DLL_SUFFIX}.dll "$%QTDIR%\bin\Qt5Svg${QT_DLL_SUFFIX}.dll"
-	
+    File /oname=$PLUGINSDIR\Qt5Core${QT_DLL_SUFFIX}.dll "QtRuntimeDLL\Qt5Core${QT_DLL_SUFFIX}.dll"
+	File /oname=$PLUGINSDIR\Qt5Gui${QT_DLL_SUFFIX}.dll "QtRuntimeDLL\Qt5Gui${QT_DLL_SUFFIX}.dll"
+	File /oname=$PLUGINSDIR\Qt5Widgets${QT_DLL_SUFFIX}.dll "QtRuntimeDLL\Qt5Widgets${QT_DLL_SUFFIX}.dll"
+	File /oname=$PLUGINSDIR\Qt5Svg${QT_DLL_SUFFIX}.dll "QtRuntimeDLL\Qt5Svg${QT_DLL_SUFFIX}.dll"
+
 	CreateDirectory $PLUGINSDIR\platforms
-	File /oname=$PLUGINSDIR\platforms\qwindows${QT_DLL_SUFFIX}.dll "$%QTDIR%\plugins\platforms\qwindows${QT_DLL_SUFFIX}.dll"
-	
+	File /oname=$PLUGINSDIR\platforms\qwindows${QT_DLL_SUFFIX}.dll "QtRuntimeDLL\platforms\qwindows${QT_DLL_SUFFIX}.dll"
+
 	CreateDirectory $PLUGINSDIR\styles
-	File /oname=$PLUGINSDIR\styles\qwindowsvistastyle${QT_DLL_SUFFIX}.dll "$%QTDIR%\plugins\styles\qwindowsvistastyle${QT_DLL_SUFFIX}.dll"
-	
+	File /oname=$PLUGINSDIR\styles\qwindowsvistastyle${QT_DLL_SUFFIX}.dll "QtRuntimeDLL\styles\qwindowsvistastyle${QT_DLL_SUFFIX}.dll"
+
 	CreateDirectory $PLUGINSDIR\imageformats
-	File /oname=$PLUGINSDIR\imageformats\qgif${QT_DLL_SUFFIX}.dll "$%QTDIR%\plugins\imageformats\qgif${QT_DLL_SUFFIX}.dll"
-	File /oname=$PLUGINSDIR\imageformats\qicns${QT_DLL_SUFFIX}.dll "$%QTDIR%\plugins\imageformats\qicns${QT_DLL_SUFFIX}.dll"
-	File /oname=$PLUGINSDIR\imageformats\qico${QT_DLL_SUFFIX}.dll "$%QTDIR%\plugins\imageformats\qico${QT_DLL_SUFFIX}.dll"
-	File /oname=$PLUGINSDIR\imageformats\qjpeg${QT_DLL_SUFFIX}.dll "$%QTDIR%\plugins\imageformats\qjpeg${QT_DLL_SUFFIX}.dll"
-	File /oname=$PLUGINSDIR\imageformats\qsvg${QT_DLL_SUFFIX}.dll "$%QTDIR%\plugins\imageformats\qsvg${QT_DLL_SUFFIX}.dll"
+	File /oname=$PLUGINSDIR\imageformats\qgif${QT_DLL_SUFFIX}.dll "QtRuntimeDLL\imageformats\qgif${QT_DLL_SUFFIX}.dll"
+	File /oname=$PLUGINSDIR\imageformats\qicns${QT_DLL_SUFFIX}.dll "QtRuntimeDLL\imageformats\qicns${QT_DLL_SUFFIX}.dll"
+	File /oname=$PLUGINSDIR\imageformats\qico${QT_DLL_SUFFIX}.dll "QtRuntimeDLL\imageformats\qico${QT_DLL_SUFFIX}.dll"
+	File /oname=$PLUGINSDIR\imageformats\qjpeg${QT_DLL_SUFFIX}.dll "QtRuntimeDLL\imageformats\qjpeg${QT_DLL_SUFFIX}.dll"
+	File /oname=$PLUGINSDIR\imageformats\qsvg${QT_DLL_SUFFIX}.dll "QtRuntimeDLL\imageformats\qsvg${QT_DLL_SUFFIX}.dll"
 	CreateDirectory $PLUGINSDIR\iconengines
-	
-	File /oname=$PLUGINSDIR\iconengines\qsvgicon${QT_DLL_SUFFIX}.dll "$%QTDIR%\plugins\iconengines\qsvgicon${QT_DLL_SUFFIX}.dll"
-	
+
+	File /oname=$PLUGINSDIR\iconengines\qsvgicon${QT_DLL_SUFFIX}.dll "QtRuntimeDLL\iconengines\qsvgicon${QT_DLL_SUFFIX}.dll"
+
 	# place vc runtime dlls to plugin directory
 	File /oname=$PLUGINSDIR\concrt140${VC_RUNTIME_DLL_SUFFIX}.dll "VCRuntimeDLL\concrt140${VC_RUNTIME_DLL_SUFFIX}.dll"
 	File /oname=$PLUGINSDIR\msvcp140${VC_RUNTIME_DLL_SUFFIX}.dll "VCRuntimeDLL\msvcp140${VC_RUNTIME_DLL_SUFFIX}.dll"
@@ -229,6 +248,32 @@ Function .onInit
 	File /oname=$PLUGINSDIR\ucrtbase${VC_RUNTIME_DLL_SUFFIX}.dll "VCRuntimeDLL\ucrtbase${VC_RUNTIME_DLL_SUFFIX}.dll"
 	File /oname=$PLUGINSDIR\vccorlib140${VC_RUNTIME_DLL_SUFFIX}.dll "VCRuntimeDLL\vccorlib140${VC_RUNTIME_DLL_SUFFIX}.dll"
 	File /oname=$PLUGINSDIR\vcruntime140${VC_RUNTIME_DLL_SUFFIX}.dll "VCRuntimeDLL\vcruntime140${VC_RUNTIME_DLL_SUFFIX}.dll"
+
+    # 读取注册表中的安装路径
+    ReadRegStr $installDir HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "InstallLocation"
+
+    # 动态修改默认安装路径
+    StrCmp $installDir "" 0 +2
+    StrCpy $installDir "${DEFAULT_INSTALL_DIR}"
+
+	; Initialize AutoInstall variable to default value "0"
+    StrCpy $AutoInstall "0"
+
+    ; Get the command line arguments
+    ; Note: Command line arguments are stored in $0, $1, ..., $n
+    ; Loop through command line arguments
+    StrCpy $0 $CMDLINE
+    ${Do}
+        ; Extract the parameter and value
+        ${StrTok} $0 "=" $1 $2
+        StrCmp $1 "/AutoInstall" 0 +2
+        ; Set AutoInstall variable if the parameter is found
+        StrCpy $AutoInstall $2
+        ; Stop further processing
+        Goto ${End}
+    ${Loop}
+    ${End}
+
 FunctionEnd
 
 
@@ -239,14 +284,14 @@ FunctionEnd
 
 
 Function .onInstFailed
-    MessageBox MB_ICONQUESTION|MB_YESNO "Install Failed!" /SD IDYES IDYES +2 IDNO +1
+    MessageBox MB_ICONQUESTION|MB_YESNO "Instll filed!" /SD IDYES IDYES +2 IDNO +1
 FunctionEnd
 
 
 
 # Before Uninstall
 Function un.onInit
-    MessageBox MB_ICONQUESTION|MB_YESNO "Are you sure to uninstall ${PRODUCT_NAME}?" /SD IDYES IDYES +2 IDNO +1
+    MessageBox MB_ICONQUESTION|MB_YESNO "Are you sure to uninstall $PRODUCT_NAME?" /SD IDYES IDYES +2 IDNO +1
     Abort
 FunctionEnd
 

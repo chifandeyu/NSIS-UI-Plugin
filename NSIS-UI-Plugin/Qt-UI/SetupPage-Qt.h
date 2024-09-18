@@ -58,6 +58,7 @@ class SetupPage_Qt :
     void SetTitle(const tstring &title) override;
     void SetRequiredSpaceKb(long kb) override;
     void SetInstallDirectory(const tstring &dir) override;
+    void StartInstall() override;
     tstring GetInstallDirectory() override;
     void SetInstallStepDescription(const tstring &description, int progressValue = -1) override;
     void NsisExtractFilesFinished() override;

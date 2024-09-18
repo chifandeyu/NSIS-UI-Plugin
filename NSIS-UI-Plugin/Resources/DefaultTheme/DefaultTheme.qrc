@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/DefaultTheme">
         <file>main.css</file>
-        <file>qt.svg</file>
         <file>close.svg</file>
         <file>minimize.svg</file>
         <file>close_hover.svg</file>
@@ -9,5 +8,6 @@
         <file>button_bk.svg</file>
         <file>openfolder.svg</file>
         <file>openfolder_hover.svg</file>
+        <file>logo.png</file>
     </qresource>
 </RCC>

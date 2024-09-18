@@ -16,7 +16,7 @@
 *
 * Expect bugs
 *
-* Please use and enjoy. 
+* Please use and enjoy.
 * Please let me know of any bugs/improvements that you have found/implemented and I will fix/incorporate them into this file.
 ********************************************************************************************************************************************************/
 
@@ -37,15 +37,18 @@ static UINT_PTR PluginCallback(enum NSPIM msg) {
 
 NSISAPI ShowSetupUI(HWND hwndParent, int stringSize, TCHAR *variables, stack_t **stacktop, ExtraParameters *extra) {
     NSMETHOD_INIT();
-  
+
     TCHAR szTitle[MAX_PATH] = { 0 };
     popstring(szTitle);
-    
+
     TCHAR szDefaultInstallDir[MAX_PATH] = { 0 };
     popstring(szDefaultInstallDir);
 
     TCHAR szNsisPluginDir[MAX_PATH] = { 0 };
     popstring(szNsisPluginDir);
+
+    TCHAR szNsAutoInstall[MAX_PATH] = { 0 };
+    popstring(szNsAutoInstall);
 
     // Start show Qt UI
     //
@@ -53,6 +56,9 @@ NSISAPI ShowSetupUI(HWND hwndParent, int stringSize, TCHAR *variables, stack_t *
         QApplication::addLibraryPath(tstringToQString(szNsisPluginDir));
     }
 
+#ifdef Q_OS_WIN
+    qputenv("QT_QPA_PLATFORM", "windows:fontengine=freetype");
+#endif
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -66,19 +72,46 @@ NSISAPI ShowSetupUI(HWND hwndParent, int stringSize, TCHAR *variables, stack_t *
     mainPage->setWindowTitle(tstringToQString(szTitle));
     mainPage->SetInstallDirectory(szDefaultInstallDir);
     PluginContext::Instance()->SetSetupPage(mainPage);
+    QString strAutoInstall = tstringToQString(szNsAutoInstall);
+    if (strAutoInstall == "1") {
+        mainPage->StartInstall();
+    }
     mainPage->show();
     app.exec();
 }
 
 NSISAPI OutputDebugInfo(HWND hwndParent, int stringSize, TCHAR *variables, stack_t **stacktop, ExtraParameters *extra) {
     NSMETHOD_INIT();
-    
+
     TCHAR szInfo[1024] = { 0 };
     popstring(szInfo);
-    
-    TCHAR szAllInfo[1124] = { 0 };
-    StringCchPrintf(szAllInfo, 1124, TEXT("[NSIS-UI-Plugin] %s\r\n"), szInfo);
-    OutputDebugString(szAllInfo);
+
+    //TCHAR szAllInfo[1124] = { 0 };
+    //StringCchPrintf(szAllInfo, 1124, TEXT("[NSIS-UI-Plugin] %s\r\n"), szInfo);
+    //OutputDebugString(szAllInfo);
+
+    // 将 TCHAR 转换为 QString
+    QString info = QString::fromWCharArray(szInfo);
+
+    // 获取临时文件夹路径
+    QString tempDirPath = QDir::tempPath();
+    QString logFilePath = tempDirPath + "/yunVM_install.log";
+
+    // 打开日志文件
+    QFile logFile(logFilePath);
+    if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+        QTextStream out(&logFile);
+
+        // 获取当前时间，写入时间戳和日志内容
+        QString timeStamp = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+        out << "[NSIS-UI-Plugin] " << timeStamp << " - " << info << "\n";
+
+        logFile.close();
+    }
+    else {
+        // 错误处理：无法打开日志文件
+        OutputDebugString(TEXT("Unable to open log file.\n"));
+    }
 }
 
 NSISAPI BindInstallEventToNsisFunc(HWND hwndParent, int stringSize, TCHAR *variables, stack_t **stacktop, ExtraParameters *extra) {
@@ -98,13 +131,13 @@ NSISAPI BindButtonClickedEventToNsisFunc(HWND hwndParent, int stringSize, TCHAR 
     popstring(szControlName);
 
     long callbackFuncAddress = popint();
-    
+
     PluginContext::Instance()->BindButtonClickedEvent(szControlName, callbackFuncAddress);
 }
 
 NSISAPI NsisExtractFilesFinished(HWND hwndParent, int stringSize, TCHAR *variables, stack_t **stacktop, ExtraParameters *extra) {
     NSMETHOD_INIT();
-    
+
     if (PluginContext::Instance()->GetSetupPage()) {
         PluginContext::Instance()->GetSetupPage()->NsisExtractFilesFinished();
     }

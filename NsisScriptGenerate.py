@@ -32,7 +32,7 @@ def generate_nsis_script(dir):
 
     for fi in os.listdir(dir):
         full_path = os.path.join(dir, fi)
-        
+
         if os.path.isdir(full_path):
             sub_dir = full_path[len(g_root_dir):]
             g_cur_script_index += 1
@@ -59,16 +59,15 @@ def do_main(nsis_script_template_path):
     generate_nsis_script(g_root_dir)
     g_insert_nsis_script_list.append('    ${UI_PLUGIN_NAME}::SetInstallStepDescription "Finished" 100')
 
-    f = open(nsis_script_template_path, "r")
-    all_nsis_script_lines = []
-    cur_line_index = -1
-    insert_line_index = -1
-    for s in f.readlines():
-        all_nsis_script_lines.append(s)
-        cur_line_index += 1
-        if s.find('Function ___ExtractFiles') != -1:
-            insert_line_index = cur_line_index + 1
-    f.close()
+    with open(nsis_script_template_path, "r", encoding="gbk") as f:
+        all_nsis_script_lines = []
+        cur_line_index = -1
+        insert_line_index = -1
+        for s in f.readlines():
+            all_nsis_script_lines.append(s)
+            cur_line_index += 1
+            if s.find('Function ___ExtractFiles') != -1:
+                insert_line_index = cur_line_index + 1
 
     if insert_line_index == -1:
         return
@@ -79,10 +78,9 @@ def do_main(nsis_script_template_path):
 
     nsis_script_path = nsis_script_template_path[:len(nsis_script_template_path) - len('-template.nsi')]
     nsis_script_path += '.nsi'
-    f = open(nsis_script_path, "w")
-    all_script = '\n'.join(all_nsis_script_lines)
-    f.write(all_script)
-    f.close()
+    with open(nsis_script_path, "w", encoding="gbk") as f:
+        all_script = '\n'.join(all_nsis_script_lines)
+        f.write(all_script)
 
 if __name__ == '__main__':
     nsis_script_template_path = sys.argv[1]
