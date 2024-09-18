@@ -454,6 +454,9 @@
         <property name="text">
          <string>立即运行 云PC远程控制终端</string>
         </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
        </widget>
       </widget>
      </widget>
