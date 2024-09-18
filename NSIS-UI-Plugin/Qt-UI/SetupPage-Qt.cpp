@@ -26,13 +26,16 @@
 
 SetupPage_Qt::SetupPage_Qt(QWidget *parent)
     : FramelessMainWindow(true, parent)
-    , m_requiredSpaceKb(0) {
+    , m_requiredSpaceKb(0)
+    , m_bAutoInstall(false)
+{
     ui.setupUi(this);
 
     ui.tabWidget->setCurrentIndex(0);
     ui.progressBarInstall->setMinimum(0);
     ui.progressBarInstall->setMaximum(100);
     ui.pushButtonToFinishedPage->setEnabled(false);
+    ui.pushButtonClose->setEnabled(false);
 
     FramelessMainWindow::setAllWidgetMouseTracking(this);
     setResizeable(false);
@@ -47,7 +50,13 @@ SetupPage_Qt::SetupPage_Qt(QWidget *parent)
     });
 
     connect(ui.pushButtonClose, &QPushButton::clicked, [this]() {
-        PluginContext::Instance()->ExecuteInstallEventFunction(INSTALL_EVENT_USER_CANCEL);
+        if (ui.tabWidget->currentIndex() == 2) {
+            ui.checkBoxRunNow->setChecked(false);
+            PluginContext::Instance()->ExecuteInstallEventFunction(INSTALL_EVENT_BEFORE_FINISHED);
+        }
+        else {
+            PluginContext::Instance()->ExecuteInstallEventFunction(INSTALL_EVENT_USER_CANCEL);
+        }
 
         exitSetup();
     });
@@ -61,7 +70,7 @@ SetupPage_Qt::SetupPage_Qt(QWidget *parent)
         updateDriverInfo();
     });
 
-    connect(ui.pushButtonStartInstall, &QPushButton::clicked, this, &SetupPage_Qt::StartInstall);
+    connect(ui.pushButtonStartInstall, &QPushButton::clicked, [this]() { StartInstall(false); });
 
     connect(ui.pushButtonToFinishedPage, &QPushButton::clicked, [this]() {
         ui.tabWidget->setCurrentIndex(2);
@@ -107,8 +116,9 @@ void SetupPage_Qt::SetInstallDirectory(const tstring &dir) {
     updateDriverInfo();
 }
 
-void SetupPage_Qt::StartInstall()
+void SetupPage_Qt::StartInstall(bool bAuto)
 {
+    m_bAutoInstall = bAuto;
     QString strDir = ui.lineEditInstallDir->text();
     if (strDir.length() == 0)
         return;
@@ -121,6 +131,8 @@ void SetupPage_Qt::StartInstall()
     }
 
     PluginContext::Instance()->ExecuteInstallEventFunction(INSTALL_EVENT_START_EXTRACT_FILES);
+
+    ui.pushButtonToFinishedPage->setVisible(!m_bAutoInstall);
 
     ui.tabWidget->setCurrentIndex(1);
 }
@@ -145,7 +157,11 @@ void SetupPage_Qt::SetInstallStepDescription(const tstring &description, int pro
 
 void SetupPage_Qt::NsisExtractFilesFinished() {
     QMetaObject::invokeMethod(this, [this]() {
+        ui.pushButtonClose->setEnabled(true);
         ui.pushButtonToFinishedPage->setEnabled(true);
+        if (m_bAutoInstall) {
+            ui.tabWidget->setCurrentIndex(2);
+        }
     }, Qt::QueuedConnection);
 }
 
@@ -158,13 +174,18 @@ bool SetupPage_Qt::IsAutoStartupOnBootEnabled() {
     return ui.checkBoxAutoStartupOnBoot->isChecked();
 }
 
+bool SetupPage_Qt::IsRunNowEnabled()
+{
+    return ui.checkBoxRunNow->isChecked();
+}
+
 void SetupPage_Qt::updateDriverInfo() {
     int driver = DriveInfo::GetDrive(ui.lineEditInstallDir->text().toStdWString().c_str());
     if (driver > 0) {
         float driverTotalMb = DriveInfo::GetTotalMB(driver);
         float driverFreeMb = DriveInfo::GetFreeMB(driver);
 
-        QString strDiskInfo = QString(tr("需要空间: %1MB 可用: %2MB  总计: %3MB")).arg(m_requiredSpaceKb / 1024).arg(driverFreeMb).arg(driverTotalMb);
+        QString strDiskInfo = QString(tr("磁盘可用空间: %2MB  总计: %3MB")).arg(driverFreeMb).arg(driverTotalMb);
         ui.labelDiskInfo->setText(strDiskInfo);
     }
 }

@@ -27,10 +27,11 @@ public:
     virtual void SetTitle(const tstring& title) = 0;
     virtual void SetRequiredSpaceKb(long kb) = 0;
     virtual void SetInstallDirectory(const tstring &dir) = 0;
-    virtual void StartInstall() = 0;
+    virtual void StartInstall(bool bAuto) = 0;
     virtual tstring GetInstallDirectory() = 0;
     virtual void SetInstallStepDescription(const tstring &description, int progressValue = -1) = 0;
     virtual bool IsCreateDesktopShortcutEnabled() = 0;
     virtual bool IsAutoStartupOnBootEnabled() = 0;
     virtual void NsisExtractFilesFinished() = 0;
+    virtual bool IsRunNowEnabled() = 0;
 };

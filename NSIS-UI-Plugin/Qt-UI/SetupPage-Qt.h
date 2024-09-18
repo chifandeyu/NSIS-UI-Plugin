@@ -58,12 +58,13 @@ class SetupPage_Qt :
     void SetTitle(const tstring &title) override;
     void SetRequiredSpaceKb(long kb) override;
     void SetInstallDirectory(const tstring &dir) override;
-    void StartInstall() override;
+    void StartInstall(bool bAuto) override;
     tstring GetInstallDirectory() override;
     void SetInstallStepDescription(const tstring &description, int progressValue = -1) override;
     void NsisExtractFilesFinished() override;
     bool IsCreateDesktopShortcutEnabled() override;
     bool IsAutoStartupOnBootEnabled() override;
+    bool IsRunNowEnabled() override;
   private:
     void updateDriverInfo();
     void exitSetup();
@@ -73,5 +74,6 @@ class SetupPage_Qt :
     std::future<void> m_addListItemAsync;
     QMutex m_waitingAddItemsMutex;
     QStringList m_waitingAddItems;
+    bool m_bAutoInstall;
 };
 

@@ -17,8 +17,10 @@
 !define DEFAULT_INSTALL_DIR    "$PROGRAMFILES\${APP_NAME}"
 
 Var /GLOBAL installDir
-; 定义一个是否自动安装的参数变量：
+; ???????????????????????????
 Var /GLOBAL AutoInstall
+
+!define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}"
 
 !ifdef DEBUG
 !define UI_PLUGIN_NAME         nsQtPluginD
@@ -90,7 +92,7 @@ Function QtUiPage
 	GetFunctionAddress $0 OnUserCancelInstall
 	${UI_PLUGIN_NAME}::BindInstallEventToNsisFunc "USER_CANCEL" $0
 
-    ${UI_PLUGIN_NAME}::ShowSetupUI "${PRODUCT_NAME} Setup" "$installDir" "$PLUGINSDIR" "$AutoInstall"
+    ${UI_PLUGIN_NAME}::ShowSetupUI "${APP_NAME} Setup" "$installDir" "$PLUGINSDIR" "$AutoInstall"
 FunctionEnd
 
 Function OnUIPrepared
@@ -125,11 +127,7 @@ FunctionEnd
 
 Function OnBeforeFinished
 	${UI_PLUGIN_NAME}::OutputDebugInfo "OnBeforeFinished"
-
-	SetShellVarContext all
-	CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
-	CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk" "$INSTDIR\${EXE_RELATIVE_PATH}"
-	CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall ${PRODUCT_NAME}.lnk" "$INSTDIR\uninst.exe"
+	Call CreateSoftware
 	SetShellVarContext current
 
 
@@ -149,6 +147,14 @@ Function OnBeforeFinished
 	${If} $0 == 1
 		WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "${APP_NAME}" "$INSTDIR\${EXE_RELATIVE_PATH}"
 	${EndIf}
+
+	# Run app now
+	${UI_PLUGIN_NAME}::IsRunNowEnabled
+	Pop $0
+	${If} $0 == 1
+    	Exec '"$INSTDIR\${EXE_RELATIVE_PATH}"'
+	${EndIf}
+
 FunctionEnd
 
 
@@ -165,15 +171,26 @@ Function OnAfterExtractFiles
 	Call CreateUninstall
 FunctionEnd
 
+Function CreateSoftware
+	SetShellVarContext all
+	CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
+	CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk" "$INSTDIR\${EXE_RELATIVE_PATH}"
+	CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall ${PRODUCT_NAME}.lnk" "$INSTDIR\uninst.exe"
 
+	WriteRegStr HKLM "Software\${APP_NAME}" "InstallDir" "$INSTDIR\${PRODUCT_NAME}"
+	WriteRegStr HKLM "Software\${APP_NAME}" "Version" ${PRODUCT_VERSION}
+FunctionEnd
 
 Function CreateUninstall
 	WriteUninstaller "$INSTDIR\uninst.exe"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "DisplayName" "${PRODUCT_NAME}"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "UninstallString" "$INSTDIR\uninst.exe"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "InstallLocation" "$INSTDIR"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "DisplayIcon" "$INSTDIR\${EXE_NAME}"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "Publisher" "${PRODUCT_PUBLISHER}"
+	WriteRegStr HKLM ${PRODUCT_UNINST_KEY} "DisplayName" "${PRODUCT_NAME}"
+	WriteRegStr HKLM ${PRODUCT_UNINST_KEY} "UninstallString" "$INSTDIR\uninst.exe"
+	WriteRegStr HKLM ${PRODUCT_UNINST_KEY} "QuietUninstallString" "$\"$INSTDIR\uninst.exe$\" /S"
+	WriteRegStr HKLM ${PRODUCT_UNINST_KEY} "InstallLocation" "$INSTDIR"
+	WriteRegStr HKLM ${PRODUCT_UNINST_KEY} "DisplayIcon" "$INSTDIR\${EXE_NAME}"
+	WriteRegStr HKLM ${PRODUCT_UNINST_KEY} "DisplayVersion" "${PRODUCT_VERSION}"
+	WriteRegStr HKLM ${PRODUCT_UNINST_KEY} "Publisher" "${PRODUCT_PUBLISHER}"
+	WriteRegStr HKLM ${PRODUCT_UNINST_KEY} "HelpLink" "https://www.bangyan.com.cn/"
 FunctionEnd
 
 # Add an empty section, avoid compile error.
@@ -190,12 +207,11 @@ Section "Uninstall"
   RMDir "$SMPROGRAMS\${PRODUCT_NAME}\"
   Delete "$DESKTOP\${PRODUCT_NAME}.lnk"
 
-  # 删除注册表项
+  DeleteRegKey HKLM "Software\${APP_NAME}"
+
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}"
 
-
-  MessageBox MB_ICONQUESTION|MB_YESNO "Uninstall" /SD IDYES IDYES +2 IDNO +1
-
+  ; MessageBox MB_ICONQUESTION|MB_YESNO "Uninstall" /SD IDYES IDYES +2 IDNO +1
 
   SetShellVarContext current
 
@@ -206,6 +222,7 @@ Section "Uninstall"
 
   SetOutPath "$DESKTOP"
 
+  RMDir /r $APPDATA\${APP_NAME}
   RMDir /r "$INSTDIR"
   RMDir "$INSTDIR"
 
@@ -249,37 +266,27 @@ Function .onInit
 	File /oname=$PLUGINSDIR\vccorlib140${VC_RUNTIME_DLL_SUFFIX}.dll "VCRuntimeDLL\vccorlib140${VC_RUNTIME_DLL_SUFFIX}.dll"
 	File /oname=$PLUGINSDIR\vcruntime140${VC_RUNTIME_DLL_SUFFIX}.dll "VCRuntimeDLL\vcruntime140${VC_RUNTIME_DLL_SUFFIX}.dll"
 
-    # 读取注册表中的安装路径
+	${UI_PLUGIN_NAME}::OutputDebugInfo "====== Function .onInit ======"
+    # read install dir from registry
     ReadRegStr $installDir HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "InstallLocation"
 
-    # 动态修改默认安装路径
+    # modify install dir, if it is empty to set default value
     StrCmp $installDir "" 0 +2
     StrCpy $installDir "${DEFAULT_INSTALL_DIR}"
 
 	; Initialize AutoInstall variable to default value "0"
     StrCpy $AutoInstall "0"
 
-    ; Extract command line arguments
+    ; 获取命令行参数
     StrCpy $0 $CMDLINE
+	${UI_PLUGIN_NAME}::OutputDebugInfo "CMDLINE: $CMDLINE"
 
-    ; Parse each command line argument
-    ; Loop through arguments
-    ${Do}
-        ; Extract parameter name and value
-        StrCmp $0 "" 0 +2
-        ; Find the position of '='
-        StrCmp $0 "=" 0 +2
-        ; Split argument
-        StrCpy $1 $0 0 $0
-        StrCpy $2 $0 0
-        ; Check if parameter is "/AutoInstall"
-        StrCmp $1 "/AutoInstall" 0 +2
-        ; Set AutoInstall variable
-        StrCpy $AutoInstall $2
-        ; Stop further processing
-        Goto ${End}
-    ${Loop}
-    ${End}
+	${UI_PLUGIN_NAME}::ParseAutoInstall "$CMDLINE"
+	Pop $0
+	; MessageBox MB_ICONQUESTION|MB_YESNO "$0"
+	StrCmp $0 "1" 0 +2
+	StrCpy $AutoInstall "1"
+	; MessageBox MB_ICONQUESTION|MB_YESNO "$AutoInstall"
 
 FunctionEnd
 
@@ -298,7 +305,7 @@ FunctionEnd
 
 # Before Uninstall
 Function un.onInit
-    MessageBox MB_ICONQUESTION|MB_YESNO "Are you sure to uninstall $PRODUCT_NAME?" /SD IDYES IDYES +2 IDNO +1
+    MessageBox MB_ICONQUESTION|MB_YESNO "Are you sure to uninstall ${PRODUCT_NAME}?" /SD IDYES IDYES +2 IDNO +1
     Abort
 FunctionEnd
 

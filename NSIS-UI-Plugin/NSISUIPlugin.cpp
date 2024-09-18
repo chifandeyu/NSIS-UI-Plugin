@@ -23,6 +23,33 @@
 #include "stdafx.h"
 #include "Qt-UI/SetupPage-Qt.h"
 
+void printLog(const QString& info) {
+    // 获取临时文件夹路径
+    QString tempDirPath = QDir::tempPath();
+    QString logFilePath = tempDirPath + "/yunVM_install.log";
+
+    // 打开日志文件
+    QFile logFile(logFilePath);
+    if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+        QTextStream out(&logFile);
+
+        // 获取当前时间，写入时间戳和日志内容
+        QString timeStamp = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+        out << "[NSIS-UI-Plugin] " << timeStamp << " - " << info << "\n";
+
+        logFile.close();
+    }
+    else {
+        // 错误处理：无法打开日志文件
+        OutputDebugString(TEXT("Unable to open log file.\n"));
+    }
+}
+
+void printLogW(const TCHAR* szMsg) {
+    // 将 TCHAR 转换为 QString
+    QString info = QString::fromWCharArray(szMsg);
+    printLog(info);
+}
 
 #define NSMETHOD_INIT() do {\
         PluginContext::Instance()->SetExtraParameters(extra); \
@@ -74,10 +101,40 @@ NSISAPI ShowSetupUI(HWND hwndParent, int stringSize, TCHAR *variables, stack_t *
     PluginContext::Instance()->SetSetupPage(mainPage);
     QString strAutoInstall = tstringToQString(szNsAutoInstall);
     if (strAutoInstall == "1") {
-        mainPage->StartInstall();
+        mainPage->StartInstall(true);
     }
     mainPage->show();
     app.exec();
+}
+
+NSISAPI ParseAutoInstall(HWND hwndParent, int stringSize, TCHAR* variables, stack_t** stacktop, ExtraParameters* extra) {
+    TCHAR szCMDLINE[MAX_PATH] = { 0 };
+    popstring(szCMDLINE);
+
+    tstring strAutoInstall = _T("0");
+    std::wstring strCmdLine = szCMDLINE;
+    printLog("ParseAutoInstall...");
+    std::wstring key = _T("/AutoInstall=");
+    size_t startPos = strCmdLine.find(key);
+    //printLogW(strCmdLine.c_str());
+    if (startPos != std::wstring::npos) {
+        printLog("startPos != std::wstring::npos");
+        startPos += key.length();
+        //printLog("startPos: " + QString::number(startPos));
+        size_t endPos = strCmdLine.find(_T(" "), startPos); // 找到值后面的空格位置
+        if (endPos == std::basic_string<TCHAR>::npos) {
+            endPos = strCmdLine.length(); // 如果没有空格，取到字符串的末尾
+        }
+        //printLog("endPos: " + QString::number(endPos));
+        std::wstring paramValue = strCmdLine.substr(startPos, endPos - startPos);
+        printLog("AutoInstall paramValue: ");
+        printLogW(paramValue.c_str());
+        if (paramValue == _T("1")) {
+            printLog(("---- found AutoInstall"));
+            strAutoInstall = _T("1");
+        }
+    }
+    pushstring(strAutoInstall.c_str());
 }
 
 NSISAPI OutputDebugInfo(HWND hwndParent, int stringSize, TCHAR *variables, stack_t **stacktop, ExtraParameters *extra) {
@@ -90,28 +147,7 @@ NSISAPI OutputDebugInfo(HWND hwndParent, int stringSize, TCHAR *variables, stack
     //StringCchPrintf(szAllInfo, 1124, TEXT("[NSIS-UI-Plugin] %s\r\n"), szInfo);
     //OutputDebugString(szAllInfo);
 
-    // 将 TCHAR 转换为 QString
-    QString info = QString::fromWCharArray(szInfo);
-
-    // 获取临时文件夹路径
-    QString tempDirPath = QDir::tempPath();
-    QString logFilePath = tempDirPath + "/yunVM_install.log";
-
-    // 打开日志文件
-    QFile logFile(logFilePath);
-    if (logFile.open(QIODevice::Append | QIODevice::Text)) {
-        QTextStream out(&logFile);
-
-        // 获取当前时间，写入时间戳和日志内容
-        QString timeStamp = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
-        out << "[NSIS-UI-Plugin] " << timeStamp << " - " << info << "\n";
-
-        logFile.close();
-    }
-    else {
-        // 错误处理：无法打开日志文件
-        OutputDebugString(TEXT("Unable to open log file.\n"));
-    }
+    printLogW(szInfo);
 }
 
 NSISAPI BindInstallEventToNsisFunc(HWND hwndParent, int stringSize, TCHAR *variables, stack_t **stacktop, ExtraParameters *extra) {
@@ -193,6 +229,16 @@ NSISAPI IsAutoStartupOnBootEnabled(HWND hwndParent, int stringSize, TCHAR *varia
 
     if (PluginContext::Instance()->GetSetupPage()) {
         enabled = PluginContext::Instance()->GetSetupPage()->IsAutoStartupOnBootEnabled() ? 1 : 0;
+    }
+    pushint(enabled);
+}
+
+NSISAPI IsRunNowEnabled(HWND hwndParent, int stringSize, TCHAR* variables, stack_t** stacktop, ExtraParameters* extra) {
+    NSMETHOD_INIT();
+    long enabled = 0;
+
+    if (PluginContext::Instance()->GetSetupPage()) {
+        enabled = PluginContext::Instance()->GetSetupPage()->IsRunNowEnabled() ? 1 : 0;
     }
     pushint(enabled);
 }

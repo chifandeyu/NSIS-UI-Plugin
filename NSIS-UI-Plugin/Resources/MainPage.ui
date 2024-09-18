@@ -140,7 +140,7 @@
     <item row="1" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -346,10 +346,15 @@
         <property name="geometry">
          <rect>
           <x>220</x>
-          <y>110</y>
-          <width>171</width>
+          <y>140</y>
+          <width>281</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Microsoft YaHei UI</family>
+         </font>
         </property>
         <property name="text">
          <string>创建桌面快捷方式</string>
@@ -363,9 +368,15 @@
          <rect>
           <x>220</x>
           <y>80</y>
-          <width>151</width>
+          <width>291</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Microsoft YaHei UI</family>
+          <pointsize>9</pointsize>
+         </font>
         </property>
         <property name="text">
          <string>开机自启动</string>
@@ -424,6 +435,24 @@
         </property>
         <property name="text">
          <string>安装完成</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="checkBoxRunNow">
+        <property name="geometry">
+         <rect>
+          <x>220</x>
+          <y>110</y>
+          <width>291</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Microsoft YaHei UI</family>
+         </font>
+        </property>
+        <property name="text">
+         <string>立即运行 云PC远程控制终端</string>
         </property>
        </widget>
       </widget>
