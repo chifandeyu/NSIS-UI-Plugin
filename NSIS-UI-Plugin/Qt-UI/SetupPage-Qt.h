@@ -1,4 +1,4 @@
-/*******************************************************************************************************************************************************
+﻿/*******************************************************************************************************************************************************
   #@@        *@    *@@%#@@#    &@    #@%@@,         @(        &@   .@.     @@@@@@@%     @         @(        &@     .@@@%&@@&     &@    @@#        %@
   #@/@       *@   *@      @%   &@   %@      @/      @(        &@   .@.     @,     ,@    @         @(        &@    @@        @*   &@    @,&@       %@
   #@  @(     *@   ,@           &@   #@              @(        &@   .@.     @,      @*   @         @(        &@   @&              &@    @, *@      %@
@@ -28,6 +28,7 @@
 #include "ui_MainPage.h"
 #include "Qt-FramelessWindow/FramelessMainWindow.h"
 #include <QMap>
+#include <QProcess>
 
 inline QString tstringToQString(const tstring &str) {
     QString strResult;
@@ -65,6 +66,12 @@ class SetupPage_Qt :
     bool IsCreateDesktopShortcutEnabled() override;
     bool IsAutoStartupOnBootEnabled() override;
     bool IsRunNowEnabled() override;
+
+    void setAppName(const tstring& appName);
+protected slots:
+    void onFinishButtonClicked();
+    void onToFinishedPage();
+
   private:
     void updateDriverInfo();
     void exitSetup();
@@ -74,6 +81,7 @@ class SetupPage_Qt :
     std::future<void> m_addListItemAsync;
     QMutex m_waitingAddItemsMutex;
     QStringList m_waitingAddItems;
-    bool m_bAutoInstall;
+    bool m_bUpdateInstall;
+    QString m_appName;
 };
 

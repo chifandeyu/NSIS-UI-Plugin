@@ -27,15 +27,15 @@
 SetupPage_Qt::SetupPage_Qt(QWidget *parent)
     : FramelessMainWindow(true, parent)
     , m_requiredSpaceKb(0)
-    , m_bAutoInstall(false)
+    , m_bUpdateInstall(false)
 {
     ui.setupUi(this);
+    this->setWindowIcon(QIcon(":/DefaultTheme/logo.png"));
 
     ui.tabWidget->setCurrentIndex(0);
     ui.progressBarInstall->setMinimum(0);
     ui.progressBarInstall->setMaximum(100);
     ui.pushButtonToFinishedPage->setEnabled(false);
-    ui.pushButtonClose->setEnabled(false);
 
     FramelessMainWindow::setAllWidgetMouseTracking(this);
     setResizeable(false);
@@ -65,22 +65,18 @@ SetupPage_Qt::SetupPage_Qt(QWidget *parent)
         const QString oldDir = ui.lineEditInstallDir->text();
         QString dir = QFileDialog::getExistingDirectory(this, tr("打开文件夹"), "/", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
         dir = QDir::toNativeSeparators(dir);
-        if (dir.isEmpty() || dir == oldDir) return;
+        if (dir.isEmpty()) return;
+        dir = dir + "\\" + m_appName;
+        if (dir == oldDir) return;
         ui.lineEditInstallDir->setText(dir);
         updateDriverInfo();
     });
 
     connect(ui.pushButtonStartInstall, &QPushButton::clicked, [this]() { StartInstall(false); });
 
-    connect(ui.pushButtonToFinishedPage, &QPushButton::clicked, [this]() {
-        ui.tabWidget->setCurrentIndex(2);
-    });
+    connect(ui.pushButtonToFinishedPage, &QPushButton::clicked, this, &SetupPage_Qt::onToFinishedPage);
 
-    connect(ui.pushButtonFinish, &QPushButton::clicked, [this]() {
-        PluginContext::Instance()->ExecuteInstallEventFunction(INSTALL_EVENT_BEFORE_FINISHED);
-
-        exitSetup();
-    });
+    connect(ui.pushButtonFinish, &QPushButton::clicked, this, &SetupPage_Qt::onFinishButtonClicked);
 
     m_addListItemAsync = std::async(std::launch::async, [this]() {
         HANDLE exitEvent = PluginContext::Instance()->GetExitEvent();
@@ -118,7 +114,7 @@ void SetupPage_Qt::SetInstallDirectory(const tstring &dir) {
 
 void SetupPage_Qt::StartInstall(bool bAuto)
 {
-    m_bAutoInstall = bAuto;
+    m_bUpdateInstall = bAuto;
     QString strDir = ui.lineEditInstallDir->text();
     if (strDir.length() == 0)
         return;
@@ -130,10 +126,15 @@ void SetupPage_Qt::StartInstall(bool bAuto)
         }
     }
 
+    ui.pushButtonToFinishedPage->setVisible(!m_bUpdateInstall);
+    ui.pushButtonClose->setEnabled(false);
+
     PluginContext::Instance()->ExecuteInstallEventFunction(INSTALL_EVENT_START_EXTRACT_FILES);
 
-    ui.pushButtonToFinishedPage->setVisible(!m_bAutoInstall);
-
+    if (m_bUpdateInstall)
+    {
+        ui.labelInstalling->setText(tr("正在更新，请稍等..."));
+    }
     ui.tabWidget->setCurrentIndex(1);
 }
 
@@ -159,8 +160,9 @@ void SetupPage_Qt::NsisExtractFilesFinished() {
     QMetaObject::invokeMethod(this, [this]() {
         ui.pushButtonClose->setEnabled(true);
         ui.pushButtonToFinishedPage->setEnabled(true);
-        if (m_bAutoInstall) {
-            ui.tabWidget->setCurrentIndex(2);
+        if (m_bUpdateInstall) {
+            onToFinishedPage();
+            ui.labelFinish->setText(tr("更新完成！"));
         }
     }, Qt::QueuedConnection);
 }
@@ -177,6 +179,23 @@ bool SetupPage_Qt::IsAutoStartupOnBootEnabled() {
 bool SetupPage_Qt::IsRunNowEnabled()
 {
     return ui.checkBoxRunNow->isChecked();
+}
+
+void SetupPage_Qt::setAppName(const tstring& appName)
+{
+    m_appName = tstringToQString(appName);
+}
+
+void SetupPage_Qt::onFinishButtonClicked()
+{
+    PluginContext::Instance()->ExecuteInstallEventFunction(INSTALL_EVENT_BEFORE_FINISHED);
+
+    exitSetup();
+}
+
+void SetupPage_Qt::onToFinishedPage()
+{
+    ui.tabWidget->setCurrentIndex(2);
 }
 
 void SetupPage_Qt::updateDriverInfo() {

@@ -1,3 +1,4 @@
+﻿
 import os
 import sys
 
@@ -45,7 +46,7 @@ def generate_nsis_script(dir):
             g_cur_script_index += 1
             g_insert_nsis_script_list.append('    SetOutPath "$INSTDIR{0}"'.format(dir[len(g_root_dir):]))
             g_insert_nsis_script_list.append('    File "{0}"'.format( full_path))
-            g_insert_nsis_script_list.append('    {0}::SetInstallStepDescription "Extract File: $INSTDIR{1}" {2}'
+            g_insert_nsis_script_list.append('    {0}::SetInstallStepDescription "解压文件: $INSTDIR{1}" {2}'
                                              .format('${UI_PLUGIN_NAME}', full_path[len(g_root_dir):], g_cur_script_index * 100 / (g_extract_file_cmd_total + g_create_dir_cmd_total)))
 
 
@@ -57,9 +58,9 @@ def do_main(nsis_script_template_path):
     print("file total: " + str(g_extract_file_cmd_total) + ", dir total: " + str(g_create_dir_cmd_total))
 
     generate_nsis_script(g_root_dir)
-    g_insert_nsis_script_list.append('    ${UI_PLUGIN_NAME}::SetInstallStepDescription "Finished" 100')
+    g_insert_nsis_script_list.append('    ${UI_PLUGIN_NAME}::SetInstallStepDescription "完成" 100')
 
-    with open(nsis_script_template_path, "r", encoding="gbk") as f:
+    with open(nsis_script_template_path, "r", encoding="utf-8-sig") as f:
         all_nsis_script_lines = []
         cur_line_index = -1
         insert_line_index = -1
@@ -78,7 +79,7 @@ def do_main(nsis_script_template_path):
 
     nsis_script_path = nsis_script_template_path[:len(nsis_script_template_path) - len('-template.nsi')]
     nsis_script_path += '.nsi'
-    with open(nsis_script_path, "w", encoding="gbk") as f:
+    with open(nsis_script_path, "w", encoding="utf-8-sig") as f:
         all_script = '\n'.join(all_nsis_script_lines)
         f.write(all_script)
 

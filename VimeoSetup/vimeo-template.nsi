@@ -1,7 +1,7 @@
-# ========================= User Defined Macro ==============================
+﻿# ========================= User Defined Macro ==============================
 
 # Most time you just need edit user defined macro
-!define PRODUCT_NAME           "yunVM"
+!define PRODUCT_NAME           "云PC远程控制终端"
 !define APP_NAME               "yunVM"
 !define EXE_NAME               "yunVM.exe"
 !define EXE_RELATIVE_PATH      "yunVM.exe"
@@ -17,7 +17,7 @@
 !define DEFAULT_INSTALL_DIR    "$PROGRAMFILES\${APP_NAME}"
 
 Var /GLOBAL installDir
-; ???????????????????????????
+
 Var /GLOBAL AutoInstall
 
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}"
@@ -53,11 +53,11 @@ VIAddVersionKey "LegalCopyright"    "${PRODUCT_LEGAL}"
 Unicode True
 SetCompressor LZMA
 !ifdef DEBUG
-Name "${PRODUCT_NAME} [Debug]"
-OutFile "${PRODUCT_NAME}-${PRODUCT_VERSION}-setup-x86-debug.exe"
+Name "${APP_NAME} [Debug]"
+OutFile "${APP_NAME}-${PRODUCT_VERSION}-setup-x86-debug.exe"
 !else
-Name "${PRODUCT_NAME}"
-OutFile "${PRODUCT_NAME}-${PRODUCT_VERSION}-x86-setup.exe"
+Name "${APP_NAME}"
+OutFile "${APP_NAME}-${PRODUCT_VERSION}-x86-setup.exe"
 !endif
 
 # ICON
@@ -92,7 +92,7 @@ Function QtUiPage
 	GetFunctionAddress $0 OnUserCancelInstall
 	${UI_PLUGIN_NAME}::BindInstallEventToNsisFunc "USER_CANCEL" $0
 
-    ${UI_PLUGIN_NAME}::ShowSetupUI "${APP_NAME} Setup" "$installDir" "$PLUGINSDIR" "$AutoInstall"
+    ${UI_PLUGIN_NAME}::ShowSetupUI "${APP_NAME}" "$installDir" "$PLUGINSDIR" "$AutoInstall"
 FunctionEnd
 
 Function OnUIPrepared
@@ -175,9 +175,9 @@ Function CreateSoftware
 	SetShellVarContext all
 	CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
 	CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk" "$INSTDIR\${EXE_RELATIVE_PATH}"
-	CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall ${PRODUCT_NAME}.lnk" "$INSTDIR\uninst.exe"
+	CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\卸载${PRODUCT_NAME}.lnk" "$INSTDIR\uninst.exe"
 
-	WriteRegStr HKLM "Software\${APP_NAME}" "InstallDir" "$INSTDIR\${PRODUCT_NAME}"
+	WriteRegStr HKLM "Software\${APP_NAME}" "InstallDir" "$INSTDIR"
 	WriteRegStr HKLM "Software\${APP_NAME}" "Version" ${PRODUCT_VERSION}
 FunctionEnd
 
@@ -203,7 +203,7 @@ Section "Uninstall"
 
   SetShellVarContext all
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk"
-  Delete "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall ${PRODUCT_NAME}.lnk"
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\卸载${PRODUCT_NAME}.lnk"
   RMDir "$SMPROGRAMS\${PRODUCT_NAME}\"
   Delete "$DESKTOP\${PRODUCT_NAME}.lnk"
 
@@ -277,7 +277,7 @@ Function .onInit
 	; Initialize AutoInstall variable to default value "0"
     StrCpy $AutoInstall "0"
 
-    ; ��ȡ�����в���
+    ; 获取命令行参数
     StrCpy $0 $CMDLINE
 	${UI_PLUGIN_NAME}::OutputDebugInfo "CMDLINE: $CMDLINE"
 
@@ -298,15 +298,16 @@ FunctionEnd
 
 
 Function .onInstFailed
-    MessageBox MB_ICONQUESTION|MB_YESNO "Instll filed!" /SD IDYES IDYES +2 IDNO +1
+    MessageBox MB_ICONQUESTION|MB_YESNO "安装失败!" /SD IDYES IDYES +2 IDNO +1
 FunctionEnd
 
 
 
 # Before Uninstall
 Function un.onInit
-    MessageBox MB_ICONQUESTION|MB_YESNO "Are you sure to uninstall ${PRODUCT_NAME}?" /SD IDYES IDYES +2 IDNO +1
+    MessageBox MB_ICONQUESTION|MB_YESNO "你确定卸载${PRODUCT_NAME}吗?" /SD IDYES IDYES +2 IDNO +1
     Abort
+	${UI_PLUGIN_NAME}::KillProcess "${EXE_NAME}"
 FunctionEnd
 
 Function un.onUninstSuccess

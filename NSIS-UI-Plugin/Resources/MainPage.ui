@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>565</width>
-    <height>360</height>
+    <height>340</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -140,7 +140,7 @@
     <item row="1" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -255,7 +255,7 @@
        <zorder>label</zorder>
        <zorder>labelDiskInfo</zorder>
       </widget>
-      <widget class="QWidget" name="tab_statlling">
+      <widget class="QWidget" name="tab_instatlling">
        <attribute name="title">
         <string>Tab 2</string>
        </attribute>
@@ -316,7 +316,7 @@
          </rect>
         </property>
        </widget>
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="labelInstalling">
         <property name="geometry">
          <rect>
           <x>30</x>
@@ -342,46 +342,6 @@
        <attribute name="title">
         <string>Tab 3</string>
        </attribute>
-       <widget class="QCheckBox" name="checkBoxDesktopShortcut">
-        <property name="geometry">
-         <rect>
-          <x>220</x>
-          <y>140</y>
-          <width>281</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <family>Microsoft YaHei UI</family>
-         </font>
-        </property>
-        <property name="text">
-         <string>创建桌面快捷方式</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBoxAutoStartupOnBoot">
-        <property name="geometry">
-         <rect>
-          <x>220</x>
-          <y>80</y>
-          <width>291</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <family>Microsoft YaHei UI</family>
-          <pointsize>9</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>开机自启动</string>
-        </property>
-       </widget>
        <widget class="QPushButton" name="pushButtonFinish">
         <property name="geometry">
          <rect>
@@ -416,7 +376,7 @@
          <string>完成</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="labelFinish">
         <property name="geometry">
          <rect>
           <x>50</x>
@@ -437,26 +397,86 @@
          <string>安装完成</string>
         </property>
        </widget>
-       <widget class="QCheckBox" name="checkBoxRunNow">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>220</x>
-          <y>110</y>
-          <width>291</width>
-          <height>16</height>
+          <y>72</y>
+          <width>301</width>
+          <height>101</height>
          </rect>
         </property>
-        <property name="font">
-         <font>
-          <family>Microsoft YaHei UI</family>
-         </font>
-        </property>
-        <property name="text">
-         <string>立即运行 云PC远程控制终端</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxAutoStartupOnBoot">
+           <property name="font">
+            <font>
+             <family>Microsoft YaHei UI</family>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>开机自启动</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxRunNow">
+           <property name="font">
+            <font>
+             <family>Microsoft YaHei UI</family>
+            </font>
+           </property>
+           <property name="text">
+            <string>立即运行 云PC远程控制终端</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxDesktopShortcut">
+           <property name="font">
+            <font>
+             <family>Microsoft YaHei UI</family>
+            </font>
+           </property>
+           <property name="text">
+            <string>创建桌面快捷方式</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </widget>
       </widget>
      </widget>

@@ -1,4 +1,4 @@
-/*******************************************************************************************************************************************************
+﻿/*******************************************************************************************************************************************************
   #@@        *@    *@@%#@@#    &@    #@%@@,         @(        &@   .@.     @@@@@@@%     @         @(        &@     .@@@%&@@&     &@    @@#        %@
   #@/@       *@   *@      @%   &@   %@      @/      @(        &@   .@.     @,     ,@    @         @(        &@    @@        @*   &@    @,&@       %@
   #@  @(     *@   ,@           &@   #@              @(        &@   .@.     @,      @*   @         @(        &@   @&              &@    @, *@      %@
@@ -22,7 +22,43 @@
 
 #include "stdafx.h"
 #include "Qt-UI/SetupPage-Qt.h"
+#include <tlhelp32.h>
 
+void printLog(const QString& info);
+void printLogW(const TCHAR* szMsg);
+
+bool IsProcessRunning(const wchar_t* processName) {
+    // 获取系统中的所有进程的快照
+    HANDLE hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hProcessSnap == INVALID_HANDLE_VALUE) {
+        printLog("Failed to create process snapshot.");
+        return false;
+    }
+
+    // 初始化PROCESSENTRY32结构体
+    PROCESSENTRY32 pe32;
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+
+    // 获取第一个进程的信息
+    if (!Process32First(hProcessSnap, &pe32)) {
+        printLog("Failed to retrieve first process.");
+        CloseHandle(hProcessSnap); // 关闭句柄
+        return false;
+    }
+
+    // 遍历系统中的所有进程
+    do {
+        // 比较进程名称
+        if (_wcsicmp(pe32.szExeFile, processName) == 0) {
+            CloseHandle(hProcessSnap); // 找到进程后关闭句柄
+            return true;
+        }
+    } while (Process32Next(hProcessSnap, &pe32));
+
+    // 如果没有找到进程，关闭句柄并返回false
+    CloseHandle(hProcessSnap);
+    return false;
+}
 void printLog(const QString& info) {
     // 获取临时文件夹路径
     QString tempDirPath = QDir::tempPath();
@@ -64,9 +100,9 @@ static UINT_PTR PluginCallback(enum NSPIM msg) {
 
 NSISAPI ShowSetupUI(HWND hwndParent, int stringSize, TCHAR *variables, stack_t **stacktop, ExtraParameters *extra) {
     NSMETHOD_INIT();
-
-    TCHAR szTitle[MAX_PATH] = { 0 };
-    popstring(szTitle);
+    //Sleep(10 * 1000);
+    TCHAR szAppName[MAX_PATH] = { 0 };
+    popstring(szAppName);
 
     TCHAR szDefaultInstallDir[MAX_PATH] = { 0 };
     popstring(szDefaultInstallDir);
@@ -83,6 +119,8 @@ NSISAPI ShowSetupUI(HWND hwndParent, int stringSize, TCHAR *variables, stack_t *
         QApplication::addLibraryPath(tstringToQString(szNsisPluginDir));
     }
 
+    std::wstring szTitle = std::wstring(szAppName) + _T(" Setup");
+
 #ifdef Q_OS_WIN
     qputenv("QT_QPA_PLATFORM", "windows:fontengine=freetype");
 #endif
@@ -95,6 +133,7 @@ NSISAPI ShowSetupUI(HWND hwndParent, int stringSize, TCHAR *variables, stack_t *
     GetModuleFileNameA(NULL, currentPath, MAX_PATH);
     char *argv[2] = { {currentPath}, {} };
     QApplication app(argc, argv);
+    app.setFont(QFont("Microsoft YaHei UI", 9));
     SetupPage_Qt *mainPage = new SetupPage_Qt();
     mainPage->setWindowTitle(tstringToQString(szTitle));
     mainPage->SetInstallDirectory(szDefaultInstallDir);
@@ -103,6 +142,24 @@ NSISAPI ShowSetupUI(HWND hwndParent, int stringSize, TCHAR *variables, stack_t *
     if (strAutoInstall == "1") {
         mainPage->StartInstall(true);
     }
+    while (true)
+    {
+        std::wstring szExeName = std::wstring(szAppName) + std::wstring(L".exe");
+        bool isRuning = IsProcessRunning(szExeName.c_str());
+        if (isRuning) {
+            std::wstring msgTitle = _T("警告");
+            std::wstring msgContent = _T("应用程序正在运行，请先关闭应用程序再重试安装！");
+            int ret = QMessageBox::warning(0, tstringToQString(msgTitle), tstringToQString(msgContent));
+            if (ret == QMessageBox::Ok) {
+                continue;
+            }
+            return;
+        }
+        else {
+            break;
+        }
+    }
+    mainPage->setAppName(szAppName);
     mainPage->show();
     app.exec();
 }
@@ -135,6 +192,13 @@ NSISAPI ParseAutoInstall(HWND hwndParent, int stringSize, TCHAR* variables, stac
         }
     }
     pushstring(strAutoInstall.c_str());
+}
+
+NSISAPI KillProcess(HWND hwndParent, int stringSize, TCHAR* variables, stack_t** stacktop, ExtraParameters* extra) {
+    TCHAR szProcessName[MAX_PATH] = { 0 };
+    popstring(szProcessName);
+
+    QProcess::startDetached("taskkill", QStringList() << "/f" << "/im" << tstringToQString(szProcessName));
 }
 
 NSISAPI OutputDebugInfo(HWND hwndParent, int stringSize, TCHAR *variables, stack_t **stacktop, ExtraParameters *extra) {
