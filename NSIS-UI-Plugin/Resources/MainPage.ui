@@ -6,15 +6,18 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>565</width>
-    <height>340</height>
+    <width>540</width>
+    <height>420</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <property name="spacing">
+     <number>0</number>
+    </property>
     <property name="leftMargin">
      <number>0</number>
     </property>
@@ -27,20 +30,17 @@
     <property name="bottomMargin">
      <number>0</number>
     </property>
-    <property name="spacing">
-     <number>0</number>
-    </property>
-    <item row="0" column="0">
+    <item>
      <widget class="QWidget" name="widgetTitle" native="true">
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>48</height>
-       </size>
-      </property>
       <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="leftMargin">
+        <number>10</number>
+       </property>
        <property name="topMargin">
         <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>4</number>
        </property>
        <property name="bottomMargin">
         <number>0</number>
@@ -55,20 +55,14 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>30</width>
-           <height>30</height>
+           <width>24</width>
+           <height>24</height>
           </size>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QLabel" name="labelTitle">
-         <property name="font">
-          <font>
-           <family>Microsoft JhengHei UI</family>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
          <property name="text">
           <string>云PC远程控制终端安装</string>
          </property>
@@ -97,8 +91,8 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>26</width>
-           <height>26</height>
+           <width>24</width>
+           <height>24</height>
           </size>
          </property>
          <property name="cursor">
@@ -122,8 +116,8 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>26</width>
-           <height>26</height>
+           <width>24</width>
+           <height>24</height>
           </size>
          </property>
          <property name="cursor">
@@ -137,8 +131,14 @@
       </layout>
      </widget>
     </item>
-    <item row="1" column="0">
+    <item>
      <widget class="QTabWidget" name="tabWidget">
+      <property name="font">
+       <font>
+        <family>Microsoft YaHei UI</family>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
       <property name="currentIndex">
        <number>0</number>
       </property>
@@ -155,47 +155,13 @@
        <attribute name="title">
         <string>Tab 1</string>
        </attribute>
-       <widget class="QPushButton" name="pushButtonStartInstall">
-        <property name="geometry">
-         <rect>
-          <x>420</x>
-          <y>230</y>
-          <width>100</width>
-          <height>30</height>
-         </rect>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>100</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="cursor">
-         <cursorShape>PointingHandCursor</cursorShape>
-        </property>
-        <property name="text">
-         <string>开始安装</string>
-        </property>
-       </widget>
        <widget class="QPushButton" name="pushButtonSelectInstallDir">
         <property name="geometry">
          <rect>
-          <x>486</x>
-          <y>100</y>
-          <width>31</width>
-          <height>23</height>
+          <x>470</x>
+          <y>108</y>
+          <width>24</width>
+          <height>24</height>
          </rect>
         </property>
         <property name="cursor">
@@ -208,21 +174,27 @@
        <widget class="QLineEdit" name="lineEditInstallDir">
         <property name="geometry">
          <rect>
-          <x>45</x>
-          <y>100</y>
-          <width>431</width>
-          <height>23</height>
+          <x>40</x>
+          <y>104</y>
+          <width>420</width>
+          <height>32</height>
          </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
         </property>
        </widget>
        <widget class="QLabel" name="labelDiskInfo">
         <property name="geometry">
          <rect>
-          <x>45</x>
-          <y>130</y>
+          <x>40</x>
+          <y>142</y>
           <width>421</width>
-          <height>16</height>
+          <height>18</height>
          </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
         </property>
         <property name="text">
          <string/>
@@ -231,29 +203,108 @@
        <widget class="QLabel" name="label">
         <property name="geometry">
          <rect>
-          <x>45</x>
-          <y>60</y>
+          <x>40</x>
+          <y>78</y>
           <width>301</width>
-          <height>31</height>
+          <height>18</height>
          </rect>
         </property>
         <property name="font">
          <font>
           <family>Microsoft YaHei UI</family>
-          <pointsize>12</pointsize>
+          <pointsize>-1</pointsize>
           <weight>50</weight>
           <bold>false</bold>
          </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">font-size: 14px;
+color: #464646;
+line-height: 12px;</string>
         </property>
         <property name="text">
          <string>选择安装位置</string>
         </property>
        </widget>
-       <zorder>pushButtonStartInstall</zorder>
+       <widget class="QWidget" name="bottomInstall" native="true">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>310</y>
+          <width>534</width>
+          <height>48</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>10</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButtonStartInstall">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>Microsoft YaHei UI</family>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
+           <property name="cursor">
+            <cursorShape>PointingHandCursor</cursorShape>
+           </property>
+           <property name="text">
+            <string>开始安装</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
        <zorder>pushButtonSelectInstallDir</zorder>
        <zorder>lineEditInstallDir</zorder>
        <zorder>label</zorder>
        <zorder>labelDiskInfo</zorder>
+       <zorder>bottomInstall</zorder>
       </widget>
       <widget class="QWidget" name="tab_instatlling">
        <attribute name="title">
@@ -262,125 +313,133 @@
        <widget class="QProgressBar" name="progressBarInstall">
         <property name="geometry">
          <rect>
-          <x>30</x>
-          <y>50</y>
-          <width>500</width>
-          <height>23</height>
+          <x>40</x>
+          <y>60</y>
+          <width>460</width>
+          <height>20</height>
          </rect>
         </property>
         <property name="value">
          <number>24</number>
         </property>
-       </widget>
-       <widget class="QPushButton" name="pushButtonToFinishedPage">
-        <property name="geometry">
-         <rect>
-          <x>430</x>
-          <y>250</y>
-          <width>100</width>
-          <height>30</height>
-         </rect>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>100</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="cursor">
-         <cursorShape>PointingHandCursor</cursorShape>
-        </property>
-        <property name="text">
-         <string>下一步</string>
+        <property name="invertedAppearance">
+         <bool>false</bool>
         </property>
        </widget>
        <widget class="QListWidget" name="listWidgetInstallDetails">
         <property name="geometry">
          <rect>
-          <x>30</x>
-          <y>80</y>
-          <width>500</width>
-          <height>161</height>
+          <x>40</x>
+          <y>100</y>
+          <width>460</width>
+          <height>220</height>
          </rect>
         </property>
        </widget>
        <widget class="QLabel" name="labelInstalling">
         <property name="geometry">
          <rect>
-          <x>30</x>
-          <y>10</y>
+          <x>40</x>
+          <y>34</y>
           <width>301</width>
-          <height>31</height>
+          <height>18</height>
          </rect>
         </property>
         <property name="font">
          <font>
           <family>Microsoft YaHei UI</family>
-          <pointsize>12</pointsize>
+          <pointsize>-1</pointsize>
           <weight>50</weight>
           <bold>false</bold>
          </font>
         </property>
+        <property name="styleSheet">
+         <string notr="true">font-size: 14px;
+color: #464646;
+line-height: 12px;</string>
+        </property>
         <property name="text">
          <string>正在安装...</string>
         </property>
+       </widget>
+       <widget class="QWidget" name="bottomInstalling" native="true">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>310</y>
+          <width>534</width>
+          <height>48</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>10</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButtonToFinishedPage">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="cursor">
+            <cursorShape>PointingHandCursor</cursorShape>
+           </property>
+           <property name="text">
+            <string>下一步</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </widget>
       <widget class="QWidget" name="tab_finish">
        <attribute name="title">
         <string>Tab 3</string>
        </attribute>
-       <widget class="QPushButton" name="pushButtonFinish">
-        <property name="geometry">
-         <rect>
-          <x>230</x>
-          <y>210</y>
-          <width>100</width>
-          <height>30</height>
-         </rect>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>100</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="cursor">
-         <cursorShape>PointingHandCursor</cursorShape>
-        </property>
-        <property name="text">
-         <string>完成</string>
-        </property>
-       </widget>
        <widget class="QLabel" name="labelFinish">
         <property name="geometry">
          <rect>
-          <x>50</x>
-          <y>20</y>
+          <x>170</x>
+          <y>80</y>
           <width>451</width>
           <height>31</height>
          </rect>
@@ -394,19 +453,22 @@
          </font>
         </property>
         <property name="text">
-         <string>安装完成</string>
+         <string>安装完成！</string>
         </property>
        </widget>
        <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
-          <x>220</x>
-          <y>72</y>
+          <x>170</x>
+          <y>110</y>
           <width>301</width>
-          <height>101</height>
+          <height>114</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
+         <property name="spacing">
+          <number>10</number>
+         </property>
          <item>
           <spacer name="verticalSpacer">
            <property name="orientation">
@@ -428,6 +490,9 @@
              <pointsize>9</pointsize>
             </font>
            </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
            <property name="text">
             <string>开机自启动</string>
            </property>
@@ -438,6 +503,7 @@
            <property name="font">
             <font>
              <family>Microsoft YaHei UI</family>
+             <pointsize>10</pointsize>
             </font>
            </property>
            <property name="text">
@@ -453,6 +519,7 @@
            <property name="font">
             <font>
              <family>Microsoft YaHei UI</family>
+             <pointsize>10</pointsize>
             </font>
            </property>
            <property name="text">
@@ -475,6 +542,74 @@
             </size>
            </property>
           </spacer>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="bottomFinish" native="true">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>310</y>
+          <width>531</width>
+          <height>48</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>10</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <spacer name="horizontalSpacer_4">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButtonFinish">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="cursor">
+            <cursorShape>PointingHandCursor</cursorShape>
+           </property>
+           <property name="text">
+            <string>完成</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>

@@ -42,12 +42,12 @@ Qt安装包会默认将安装目录添加`QTDIR`环境变量，如果没有自�
 
 **生成安装包**
 
-`VimeoSetup`是一个关于如何在NSIS中使用该插件的示例工程：
+`yunVMSetup`是一个关于如何在NSIS中使用该插件的示例工程：
 
 ```txt
 App                         -- 放置需要打包到安装包中的文件
 VCRuntimeDLL                -- 放置VC++运行时库文件（Debug版和Release版），Qt界面库默认采用MD模式编译，运行时需要依赖VC++运行时库
-vimeo-template.nsi          -- NSIS模板文件，文件名的`-template`后缀固定的，NsisScriptGenerate.py会根据该模板生成vimeo.nsi
+yunVM-template.nsi          -- NSIS模板文件，文件名的`-template`后缀固定的，NsisScriptGenerate.py会根据该模板生成yunVM.nsi
 build-setup [debug].bat     -- 生成Debug版的安装包，即使用Debug版的Qt和NSIS-UI-Plugin
 build-setup [debug].bat     -- 生成Release版的安装包
 ```

@@ -15,7 +15,7 @@ Download [NSIS](https://nsis.sourceforge.io/Download) and install, then add `NSI
 
 **2. Python**
 
-Install Python just for execute `NsisScriptGenerate.py` script. 
+Install Python just for execute `NsisScriptGenerate.py` script.
 
 After installed, add the direcotry where `Python.exe` is located to `Path` system environment variable.
 
@@ -43,12 +43,12 @@ If the copy fails, it may be caused by permission issues. You need to run Visual
 
 **Generate Setup**
 
-`VimeoSetup` directory is sample about how to use NSIS-UI-Plugin.
+`yunVMSetup` directory is sample about how to use NSIS-UI-Plugin.
 
 ```txt
 App                        -- Place the files that need to be packaged into the installer
 VCRuntimeDLL               -- Place VC++ runtime files(Debug/Release), Qt compiled with MD mode by default.
-vimeo-template.nsi         -- NSIS template script file,`-template` suffix is fixed, can't change. NsisScriptGenerate.py will generate vimeo.nsi based on this template.
+yunVM-template.nsi         -- NSIS template script file,`-template` suffix is fixed, can't change. NsisScriptGenerate.py will generate yunVM.nsi based on this template.
 build-setup [debug].bat    -- Generate Debug mode setup, that means using debug version Qt/NSIS-UI-Plugin.
 build-setup [debug].bat    -- Generate Release mode setup
 ```

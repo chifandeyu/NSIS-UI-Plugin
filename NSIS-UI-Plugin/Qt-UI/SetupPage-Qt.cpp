@@ -68,6 +68,10 @@ SetupPage_Qt::SetupPage_Qt(QWidget *parent)
         if (dir.isEmpty()) return;
         dir = dir + "\\" + m_appName;
         if (dir == oldDir) return;
+        if (QDir(dir).exists() && !QDir(dir).isEmpty()) {
+            QMessageBox::critical(this, tr("错误"), tr("该目录下已有文件，请选择其他目录。"));
+            return;
+        }
         ui.lineEditInstallDir->setText(dir);
         updateDriverInfo();
     });
@@ -94,6 +98,16 @@ SetupPage_Qt::SetupPage_Qt(QWidget *parent)
     });
 
     PluginContext::Instance()->ExecuteInstallEventFunction(INSTALL_EVENT_UI_PREPARED);
+    // NO USE
+    ui.pushButtonMin->setHidden(true);
+    ui.widgetLogo->setHidden(true);
+
+    const int bottomY = 340;
+    const int bottomW = 540;
+    const int bottomH = 48;
+    ui.bottomInstall->setGeometry(2, bottomY - 2, bottomW - 4, bottomH);
+    ui.bottomInstalling->setGeometry(2, bottomY - 2, bottomW - 4, bottomH);
+    ui.bottomFinish->setGeometry(2, bottomY - 2, bottomW - 4, bottomH);
 }
 
 

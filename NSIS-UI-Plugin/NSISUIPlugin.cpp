@@ -24,6 +24,8 @@
 #include "Qt-UI/SetupPage-Qt.h"
 #include <tlhelp32.h>
 
+const QString appUniqueId = "67e55044-10b1-4ca4-9ba2-77f889847cd7";
+
 void printLog(const QString& info);
 void printLogW(const TCHAR* szMsg);
 
@@ -98,6 +100,22 @@ static UINT_PTR PluginCallback(enum NSPIM msg) {
     return 0;
 }
 
+static bool isAnotherInstanceRunning(QSharedMemory& sharedMemory) {
+    // 尝试附加到已存在的共享内存
+    if (sharedMemory.attach()) {
+        // 如果附加成功，说明有其他实例正在运行
+        return true;
+    }
+    // 如果附加失败，但错误是共享内存已存在，也说明有其他实例正在运行
+    if (sharedMemory.error() == QSharedMemory::AlreadyExists) {
+        return true;
+    }
+    // 创建新的共享内存，大小为1字节
+    sharedMemory.create(1);
+    // 这里可以添加一些数据到共享内存，用于标识或通信
+    return false;
+}
+
 NSISAPI ShowSetupUI(HWND hwndParent, int stringSize, TCHAR *variables, stack_t **stacktop, ExtraParameters *extra) {
     NSMETHOD_INIT();
     //Sleep(10 * 1000);
@@ -110,8 +128,8 @@ NSISAPI ShowSetupUI(HWND hwndParent, int stringSize, TCHAR *variables, stack_t *
     TCHAR szNsisPluginDir[MAX_PATH] = { 0 };
     popstring(szNsisPluginDir);
 
-    TCHAR szNsAutoInstall[MAX_PATH] = { 0 };
-    popstring(szNsAutoInstall);
+    TCHAR szNsUpdateInstall[MAX_PATH] = { 0 };
+    popstring(szNsUpdateInstall);
 
     // Start show Qt UI
     //
@@ -138,15 +156,25 @@ NSISAPI ShowSetupUI(HWND hwndParent, int stringSize, TCHAR *variables, stack_t *
     mainPage->setWindowTitle(tstringToQString(szTitle));
     mainPage->SetInstallDirectory(szDefaultInstallDir);
     PluginContext::Instance()->SetSetupPage(mainPage);
-    QString strAutoInstall = tstringToQString(szNsAutoInstall);
-    if (strAutoInstall == "1") {
-        mainPage->StartInstall(true);
+    QSharedMemory sharedMemory(appUniqueId);
+    if (isAnotherInstanceRunning(sharedMemory)) {
+        std::wstring msgTitle = _T("警告");
+        std::wstring msgContent = _T("安装程序正在运行");
+        QMessageBox::warning(0, tstringToQString(msgTitle), tstringToQString(msgContent));
+        return;
     }
     while (true)
     {
         std::wstring szExeName = std::wstring(szAppName) + std::wstring(L".exe");
         bool isRuning = IsProcessRunning(szExeName.c_str());
         if (isRuning) {
+            static int iTryTime = 0;
+            if (iTryTime <= 5) {
+                ++iTryTime;
+                Sleep(100);
+                continue;
+            }
+
             std::wstring msgTitle = _T("警告");
             std::wstring msgContent = _T("应用程序正在运行，请先关闭应用程序再重试安装！");
             int ret = QMessageBox::warning(0, tstringToQString(msgTitle), tstringToQString(msgContent));
@@ -159,19 +187,25 @@ NSISAPI ShowSetupUI(HWND hwndParent, int stringSize, TCHAR *variables, stack_t *
             break;
         }
     }
+    QString strUpdateInstall = tstringToQString(szNsUpdateInstall);
+    if (strUpdateInstall == "1") {
+        mainPage->StartInstall(true);
+    }
     mainPage->setAppName(szAppName);
     mainPage->show();
     app.exec();
+    sharedMemory.detach();
 }
 
-NSISAPI ParseAutoInstall(HWND hwndParent, int stringSize, TCHAR* variables, stack_t** stacktop, ExtraParameters* extra) {
+NSISAPI ParseUpdateInstall(HWND hwndParent, int stringSize, TCHAR* variables, stack_t** stacktop, ExtraParameters* extra) {
+    NSMETHOD_INIT();
     TCHAR szCMDLINE[MAX_PATH] = { 0 };
     popstring(szCMDLINE);
 
-    tstring strAutoInstall = _T("0");
+    tstring strUpdateInstall = _T("0");
     std::wstring strCmdLine = szCMDLINE;
-    printLog("ParseAutoInstall...");
-    std::wstring key = _T("/AutoInstall=");
+    printLog("ParseUpdateInstall...");
+    std::wstring key = _T("/UpdateInstall=");
     size_t startPos = strCmdLine.find(key);
     //printLogW(strCmdLine.c_str());
     if (startPos != std::wstring::npos) {
@@ -184,21 +218,65 @@ NSISAPI ParseAutoInstall(HWND hwndParent, int stringSize, TCHAR* variables, stac
         }
         //printLog("endPos: " + QString::number(endPos));
         std::wstring paramValue = strCmdLine.substr(startPos, endPos - startPos);
-        printLog("AutoInstall paramValue: ");
+        printLog("UpdateInstall paramValue: ");
         printLogW(paramValue.c_str());
         if (paramValue == _T("1")) {
-            printLog(("---- found AutoInstall"));
-            strAutoInstall = _T("1");
+            printLog(("---- found UpdateInstall"));
+            strUpdateInstall = _T("1");
         }
     }
-    pushstring(strAutoInstall.c_str());
+    pushstring(strUpdateInstall.c_str());
 }
 
 NSISAPI KillProcess(HWND hwndParent, int stringSize, TCHAR* variables, stack_t** stacktop, ExtraParameters* extra) {
+    NSMETHOD_INIT();
     TCHAR szProcessName[MAX_PATH] = { 0 };
     popstring(szProcessName);
 
-    QProcess::startDetached("taskkill", QStringList() << "/f" << "/im" << tstringToQString(szProcessName));
+    QProcess::execute("taskkill", QStringList() << "/f" << "/im" << tstringToQString(szProcessName));
+}
+
+NSISAPI VersionCompare(HWND hwndParent, int stringSize, TCHAR* variables, stack_t** stacktop, ExtraParameters* extra) {
+    NSMETHOD_INIT();
+    //Sleep(10 * 1000);
+    TCHAR szString1[MAX_PATH] = { 0 };
+    popstring(szString1);
+
+    TCHAR szString2[MAX_PATH] = { 0 };
+    popstring(szString2);
+
+    QString version1 = tstringToQString(szString1);
+    QString version2 = tstringToQString(szString2);
+    if (version1 == version2) {
+        pushint(0);
+    }
+    else {
+        // 分割版本号字符串，按照点号（.）分割
+        QStringList v1Parts = version1.split('.');
+        QStringList v2Parts = version2.split('.');
+
+        // 获取版本号的最大长度（两者中最大的部分数）
+        int maxLength = std::max(v1Parts.size(), v2Parts.size());
+
+        // 对比每个部分
+        for (int i = 0; i < maxLength; ++i) {
+            // 取出每个部分，若版本号不够长，缺失的部分视为0
+            int v1 = (i < v1Parts.size()) ? v1Parts[i].toInt() : 0;
+            int v2 = (i < v2Parts.size()) ? v2Parts[i].toInt() : 0;
+
+            // 如果发现不相等，返回比较结果
+            if (v1 > v2) {
+                pushint(1); // version1 大于 version2
+                return;
+            }
+            if (v1 < v2) {
+                pushint(-1); // version1 小于 version2
+                return;
+            }
+        }
+    }
+
+    pushint(0);
 }
 
 NSISAPI OutputDebugInfo(HWND hwndParent, int stringSize, TCHAR *variables, stack_t **stacktop, ExtraParameters *extra) {

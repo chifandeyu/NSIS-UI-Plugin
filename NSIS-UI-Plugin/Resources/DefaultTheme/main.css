@@ -3,17 +3,18 @@
 }
 
 QWidget#widgetTitle {
-    border-top-right-radius: 4px;
-    border-top-left-radius: 4px;
-    /*background-color: rgb(79, 133, 233);*/
-    background-color: #888888;
+    border-top-right-radius: 2px;
+    border-top-left-radius: 2px;
+    max-height: 32px;
+    min-height: 32px;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    background-color: #0B84FF;
 }
 
-
-
 QWidget#centralWidget {
-    background-color: rgb(255,255,255);
-    border-radius: 8px;
+    background-color: #F6FAFF;
+    border-radius: 4px;
     border: 1px solid rgb(79, 133, 233);
     /* 
 	[see also]:
@@ -36,49 +37,163 @@ QSvgWidget#widgetLogo {
 }
 
 #labelTitle {
-    color: rgb(255,255,255);
+    font-size: 14px;
+    color: #FFFFFF;
 }
 
 #pushButtonMin {
     border: none;
-    image: url(:/DefaultTheme/minimize.svg);
+    min-width: 26px;
+    max-width: 26px;
+    min-height: 26px;
+    max-height: 26px;
+    border-image: url(:/DefaultTheme/minimize.png);
 }
 
 #pushButtonMin:hover {
     border: none;
-    image: url(:/DefaultTheme/minimize_hover.svg);
+    border-image: url(:/DefaultTheme/minimize_hover.png);
 }
 
 #pushButtonClose {
+    max-width: 24px;
+    min-width: 24px;
+    max-height: 24px;
+    min-height: 24px;
     border: none;
-    image: url(:/DefaultTheme/close.svg);
+    outline: 0px;
+    border-image: url(:/DefaultTheme/close_w.png);
 }
 
+/*
 #pushButtonClose:hover {
     border: none;
-    image: url(:/DefaultTheme/close_hover.svg);
+    border-image: url(:/DefaultTheme/close_hover.svg);
 }
+*/
 
-#pushButtonStartInstall, #pushButtonToFinishedPage, #pushButtonFinish {
-    border: none;
+#pushButtonStartInstall,
+#pushButtonToFinishedPage,
+#pushButtonFinish {
+    max-width: 88px;
+    min-width: 88px;
+    max-height: 32px;
+    min-height: 32px;
+    font-size: 14px;
+    color: white;
+    background-color: #0072FF;
     border-radius: 4px;
-    color: #e6e6e6;
-    background-color: #1296db;
-}
-
-#pushButtonStartInstall:hover, #pushButtonToFinishedPage:hover, #pushButtonFinish:hover {
-    border: none;
-    border-radius: 4px;
-    color: #ffffff;
-    background-color: #1296db;
+    outline: 0px;
 }
 
 #pushButtonSelectInstallDir {
+    min-width: 24px;
+    max-width: 24px;
+    min-height: 24px;
+    max-height: 24px;
     border: none;
-    image: url(:/DefaultTheme/openfolder.svg);
+    outline: 0px;
+    border-image: url(:/DefaultTheme/openfolder.png);
 }
 
 #pushButtonSelectInstallDir:hover {
     border: none;
-    image: url(:/DefaultTheme/openfolder_hover.svg);
+    outline: 0px;
+    border-image: url(:/DefaultTheme/openfolder_hover.png);
+}
+
+QProgressBar#progressBarInstall {
+    border-radius: 2px;
+    background: #D9EBFF;
+    border: none;
+    text-align: center;
+}
+
+QProgressBar#progressBarInstall:text {
+    font-size: 12px;
+    color: #464646;
+    text-align: center;
+    line-height: 12px;
+}
+
+QProgressBar#progressBarInstall::chunk {
+    border-radius: 2px;
+    background: #36CFE6;
+}
+
+#bottomFinish,
+#bottomInstalling,
+#bottomInstall {
+    background-color: #FFFFFF;
+    min-height: 48px;
+    max-height: 48px;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+    border-top: 1px solid #E5E5E5;
+}
+
+QCheckBox {
+    font-size: 14px;
+    color: rgba(0,0,0,0.85);
+    line-height: 12px;
+    outline: 0px;
+}
+QCheckBox::indicator:unchecked {
+    min-width: 20px;
+    max-width: 20px;
+    min-height: 20px;
+    max-height: 20px;
+    border-image: url(:/DefaultTheme/checkbox_un.png);
+}
+QCheckBox::indicator:checked {
+    min-width: 20px;
+    max-width: 20px;
+    min-height: 20px;
+    max-height: 20px;
+    border-image: url(:/DefaultTheme/checkbox.png);
+}
+
+#tab_start_install,
+#tab_instatlling,
+#tab_finish {
+    background-color: #F6FAFF;
+    border-left: 1px solid #E5E5E5;
+    border-top: none;
+    border-right: 1px solid #E5E5E5;
+    border-bottom: 1px solid #E5E5E5;
+}
+
+#lineEditInstallDir {
+    background: #FFFFFF;
+    border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 2px;
+    font-size: 12px;
+    color: #464646;
+    line-height: 12px;
+    padding-left: 10px;
+    padding-right: 8px;
+}
+
+#listWidgetInstallDetails {
+    background: #FFFFFF;
+    border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 2px;
+    font-size: 12px;
+    color: #464646;
+    line-height: 12px;
+    padding-left: 10px;
+    padding-top: 10px;
+    padding-right: 8px;
+}
+
+#labelFinish {
+    font-size: 16px;
+    color: #464646;
+    line-height: 12px;
+}
+
+#labelDiskInfo {
+    font-size: 12px;
+    color: rgba(0,0,0,0.45);
+    line-height: 12px;
 }
