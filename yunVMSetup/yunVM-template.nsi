@@ -18,10 +18,12 @@
 
 Var /GLOBAL installDir
 
-Var /GLOBAL AutoInstall
+Var /GLOBAL UpdateInstall
 
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}"
 !define PRODUCT_SOFTWARE_KEY "Software\${APP_NAME}"
+
+!define PRODUCT_AUTORUN_KEY "Software\Microsoft\Windows\CurrentVersion\Run"
 
 !ifdef DEBUG
 !define UI_PLUGIN_NAME         nsQtPluginD
@@ -55,7 +57,7 @@ Unicode True
 SetCompressor LZMA
 !ifdef DEBUG
 Name "${APP_NAME} [Debug]"
-OutFile "${APP_NAME}-${PRODUCT_VERSION}-setup-x86-debug.exe"
+OutFile "${APP_NAME}-${PRODUCT_VERSION}-x86-setup-debug.exe"
 !else
 Name "${APP_NAME}"
 OutFile "${APP_NAME}-${PRODUCT_VERSION}-x86-setup.exe"
@@ -79,7 +81,7 @@ UninstPage instfiles
 
 # ======================= Qt Page =========================
 Function QtUiPage
-    ${UI_PLUGIN_NAME}::OutputDebugInfo "NSIS Plugin Dir: $PLUGINSDIR, AutoInstall: $AutoInstall"
+    ${UI_PLUGIN_NAME}::OutputDebugInfo "NSIS Plugin Dir: $PLUGINSDIR, UpdateInstall: $UpdateInstall"
 
     GetFunctionAddress $0 OnUIPrepared
     ${UI_PLUGIN_NAME}::BindInstallEventToNsisFunc "UI_PREPARED" $0
@@ -93,7 +95,7 @@ Function QtUiPage
     GetFunctionAddress $0 OnUserCancelInstall
     ${UI_PLUGIN_NAME}::BindInstallEventToNsisFunc "USER_CANCEL" $0
 
-    ${UI_PLUGIN_NAME}::ShowSetupUI "${APP_NAME}" "$installDir" "$PLUGINSDIR" "$AutoInstall"
+    ${UI_PLUGIN_NAME}::ShowSetupUI "${APP_NAME}" "$installDir" "$PLUGINSDIR" "$UpdateInstall"
 FunctionEnd
 
 Function OnUIPrepared
@@ -146,7 +148,7 @@ Function OnBeforeFinished
     ${UI_PLUGIN_NAME}::IsAutoStartupOnBootEnabled
     Pop $0
     ${If} $0 == 1
-        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "${APP_NAME}" "$INSTDIR\${EXE_RELATIVE_PATH}"
+        WriteRegStr HKCU ${PRODUCT_AUTORUN_KEY} "${APP_NAME}" "$INSTDIR\${EXE_RELATIVE_PATH}"
     ${EndIf}
 
     # Run app now
@@ -213,7 +215,7 @@ Section "Uninstall"
 
   DeleteRegKey HKLM ${PRODUCT_UNINST_KEY}
   ;删除开机自启动
-  DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "${APP_NAME}"
+  DeleteRegValue HKCU ${PRODUCT_AUTORUN_KEY} "${APP_NAME}"
   ; MessageBox MB_ICONQUESTION|MB_YESNO "Uninstall" /SD IDYES IDYES +2 IDNO +1
 
   SetShellVarContext current
@@ -277,19 +279,19 @@ Function .onInit
     StrCmp $installDir "" 0 +2
     StrCpy $installDir "${DEFAULT_INSTALL_DIR}"
 
-    ; Initialize AutoInstall variable to default value "0"
-    StrCpy $AutoInstall "0"
+    ; Initialize UpdateInstall variable to default value "0"
+    StrCpy $UpdateInstall "0"
 
     ; 获取命令行参数
     StrCpy $0 $CMDLINE
     ${UI_PLUGIN_NAME}::OutputDebugInfo "CMDLINE: $CMDLINE"
 
-    ${UI_PLUGIN_NAME}::ParseAutoInstall "$CMDLINE"
+    ${UI_PLUGIN_NAME}::ParseUpdateInstall "$CMDLINE"
     Pop $0
     ; MessageBox MB_ICONQUESTION|MB_YESNO "$0"
     StrCmp $0 "1" 0 +2
-    StrCpy $AutoInstall "1"
-    ; MessageBox MB_ICONQUESTION|MB_YESNO "$AutoInstall"
+    StrCpy $UpdateInstall "1"
+    ; MessageBox MB_ICONQUESTION|MB_YESNO "$UpdateInstall"
 
     # 读取注册表的应用版本号
     ReadRegStr $0 HKLM ${PRODUCT_SOFTWARE_KEY} "Version"
@@ -306,7 +308,7 @@ Function .onInit
     Goto done
 
     is_less:
-    MessageBox MB_OK "当前安装的版本较低（版本号: ${PRODUCT_VERSION}）。安装程序将退出。"
+    MessageBox MB_OK "当前安装的版本较低（版本号: ${PRODUCT_VERSION}），安装程序将退出。"
     Quit
 
     done:
@@ -316,7 +318,9 @@ FunctionEnd
 
 
 Function .onInstSuccess
+    ${UI_PLUGIN_NAME}::OutputDebugInfo "---- start .onInstSuccess"
 
+    ${UI_PLUGIN_NAME}::OutputDebugInfo "---- end .onInstSuccess"
 FunctionEnd
 
 

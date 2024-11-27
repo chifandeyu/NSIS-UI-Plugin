@@ -155,6 +155,7 @@ NSISAPI ShowSetupUI(HWND hwndParent, int stringSize, TCHAR *variables, stack_t *
     SetupPage_Qt *mainPage = new SetupPage_Qt();
     mainPage->setWindowTitle(tstringToQString(szTitle));
     mainPage->SetInstallDirectory(szDefaultInstallDir);
+    mainPage->SetPluginsDir(szNsisPluginDir);
     PluginContext::Instance()->SetSetupPage(mainPage);
     QSharedMemory sharedMemory(appUniqueId);
     if (isAnotherInstanceRunning(sharedMemory)) {

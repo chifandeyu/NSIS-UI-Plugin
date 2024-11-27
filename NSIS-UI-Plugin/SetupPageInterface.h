@@ -27,6 +27,7 @@ public:
     virtual void SetTitle(const tstring& title) = 0;
     virtual void SetRequiredSpaceKb(long kb) = 0;
     virtual void SetInstallDirectory(const tstring &dir) = 0;
+    virtual void SetPluginsDir(const tstring& dir) = 0;
     virtual void StartInstall(bool bUpdate) = 0;
     virtual tstring GetInstallDirectory() = 0;
     virtual void SetInstallStepDescription(const tstring &description, int progressValue = -1) = 0;

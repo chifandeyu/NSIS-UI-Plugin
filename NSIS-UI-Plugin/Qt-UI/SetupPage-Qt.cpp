@@ -24,6 +24,21 @@
 #include "SetupPage-Qt.h"
 #include "../DriverInfo.h"
 
+void delayDelDirByBatchFile(const QString& batchFilePath, const QString& targetDir) {
+    QFile batchFile(batchFilePath);
+    if (batchFile.open(QIODevice::WriteOnly)) {
+        QTextStream stream(&batchFile);
+        stream << "@echo off" << endl;
+        stream << "REM Delay 8 seconds" << endl;
+        stream << "timeout /t 8 /nobreak >nul" << endl;
+        stream << "REM Clear specified directory..." << endl;
+        stream << "rd /s /q \"" << targetDir << "\"" << endl;
+        batchFile.close();
+
+        QProcess::startDetached("cmd", QStringList() << "/c" << batchFilePath);
+    }
+}
+
 SetupPage_Qt::SetupPage_Qt(QWidget *parent)
     : FramelessMainWindow(true, parent)
     , m_requiredSpaceKb(0)
@@ -124,6 +139,11 @@ void SetupPage_Qt::SetRequiredSpaceKb(long kb) {
 void SetupPage_Qt::SetInstallDirectory(const tstring &dir) {
     ui.lineEditInstallDir->setText(tstringToQString(dir));
     updateDriverInfo();
+}
+
+void SetupPage_Qt::SetPluginsDir(const tstring& dir)
+{
+    m_pluginsDir = tstringToQString(dir);
 }
 
 void SetupPage_Qt::StartInstall(bool bAuto)
@@ -227,8 +247,16 @@ void SetupPage_Qt::exitSetup() {
     HANDLE exitEvent = PluginContext::Instance()->GetExitEvent();
     if (exitEvent)
         SetEvent(exitEvent);
-    if (m_addListItemAsync.valid())
+    if (m_addListItemAsync.valid()){
         m_addListItemAsync.wait();
+    }
+
+    QMessageBox::information(nullptr, "dlldir", m_pluginsDir);
+    QDir pluginsDir(m_pluginsDir);
+    if (pluginsDir.exists()) {
+        QString batPath = QDir::tempPath() + "/nsis_plugins_clear.bat";
+        delayDelDirByBatchFile(batPath, m_pluginsDir);
+    }
     this->close();
 }
 

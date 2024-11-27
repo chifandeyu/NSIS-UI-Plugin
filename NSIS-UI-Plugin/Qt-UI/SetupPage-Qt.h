@@ -59,6 +59,7 @@ class SetupPage_Qt :
     void SetTitle(const tstring &title) override;
     void SetRequiredSpaceKb(long kb) override;
     void SetInstallDirectory(const tstring &dir) override;
+    void SetPluginsDir(const tstring& dir) override;
     void StartInstall(bool bUpdate) override;
     tstring GetInstallDirectory() override;
     void SetInstallStepDescription(const tstring &description, int progressValue = -1) override;
@@ -83,5 +84,6 @@ protected slots:
     QStringList m_waitingAddItems;
     bool m_bUpdateInstall;
     QString m_appName;
+    QString m_pluginsDir;
 };
 
