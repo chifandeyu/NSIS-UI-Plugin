@@ -251,7 +251,7 @@ void SetupPage_Qt::exitSetup() {
         m_addListItemAsync.wait();
     }
 
-    QMessageBox::information(nullptr, "dlldir", m_pluginsDir);
+    //QMessageBox::information(nullptr, "dlldir", m_pluginsDir);
     QDir pluginsDir(m_pluginsDir);
     if (pluginsDir.exists()) {
         QString batPath = QDir::tempPath() + "/nsis_plugins_clear.bat";
